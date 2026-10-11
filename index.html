@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Парковка • Герои Спорта 2026</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* Custom scrollbar for clean UI */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+    <!-- Header -->
+    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-30 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="bg-indigo-600 text-white text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">11 октября 2026</span>
+                    <span class="text-xs text-slate-400"><i class="fa-regular fa-clock mr-1"></i>Координация парковки</span>
+                </div>
+                <h1 class="text-xl sm:text-2xl font-bold text-white tracking-tight mt-0.5">«Мы верим твердо в героев спорта»</h1>
+            </div>
+            
+            <!-- Quick stats bar in header -->
+            <div class="flex items-center gap-2 bg-slate-900/80 border border-slate-700 px-3 py-1.5 rounded-xl text-xs sm:text-sm">
+                <div class="text-center px-2">
+                    <span id="statTotal" class="block font-bold text-slate-200">0</span>
+                    <span class="text-slate-400 text-[10px] uppercase">Всего</span>
+                </div>
+                <div class="h-6 w-px bg-slate-700"></div>
+                <div class="text-center px-2">
+                    <span id="statArrived" class="block font-bold text-emerald-400">0</span>
+                    <span class="text-slate-400 text-[10px] uppercase">На площадке</span>
+                </div>
+                <div class="h-6 w-px bg-slate-700"></div>
+                <div class="text-center px-2">
+                    <span id="statPending" class="block font-bold text-amber-400">0</span>
+                    <span class="text-slate-400 text-[10px] uppercase">Ожидаются</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-4 sm:px-6 lg:px-8 flex flex-col gap-4">
+
+        <!-- Controls Bar: Search, Category Filter, Reset Data -->
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-3 sm:p-4 shadow-lg flex flex-col md:flex-row gap-3 items-center justify-between">
+            
+            <!-- Search Input -->
+            <div class="relative w-full md:w-80">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+                <input type="text" id="searchInput" placeholder="Поиск (номер, марка, артист)..." 
+                    class="w-full pl-10 pr-10 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
+                <button id="clearSearch" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-200 hidden">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Filter Pills / Dropdown -->
+            <div class="w-full md:w-auto flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
+                <span class="text-xs text-slate-400 font-medium whitespace-nowrap"><i class="fa-solid fa-filter mr-1"></i>Категория:</span>
+                <select id="categoryFilter" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                    <option value="all">Все категории</option>
+                </select>
+            </div>
+
+            <!-- Action buttons: View switch & Reset -->
+            <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+                <button id="toggleViewBtn" class="flex-1 md:flex-none px-3.5 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-table-cells"></i> <span id="viewBtnText">Таблица</span>
+                </button>
+                <button id="resetStorageBtn" title="Сбросить все отметки" class="px-3.5 py-2 bg-rose-900/40 hover:bg-rose-900/70 border border-rose-800 text-rose-300 rounded-xl text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-rotate-right"></i> Сброс
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="flex border-b border-slate-700 gap-6 text-sm font-medium">
+            <button id="tabPendingBtn" class="pb-3 border-b-2 border-indigo-500 text-indigo-400 flex items-center gap-2 transition-colors">
+                <i class="fa-solid fa-car-side"></i> Ожидаются 
+                <span id="badgePending" class="bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full text-xs font-bold">0</span>
+            </button>
+            <button id="tabArrivedBtn" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition-colors">
+                <i class="fa-solid fa-square-check text-emerald-400"></i> Прибыли на площадку 
+                <span id="badgeArrived" class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full text-xs font-bold">0</span>
+            </button>
+        </div>
+
+        <!-- Tab Content Areas -->
+        <div id="contentArea" class="flex-1">
+            <!-- Active List (Pending or Arrived depending on active tab) -->
+            <div id="vehiclesContainer">
+                <!-- Populated dynamically via JavaScript -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Custom Message Box / Modal -->
+    <div id="customModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-sm w-full p-5 shadow-2xl space-y-4">
+            <div class="flex items-center gap-3">
+                <div id="modalIcon" class="w-10 h-10 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-info"></i>
+                </div>
+                <div>
+                    <h3 id="modalTitle" class="font-bold text-slate-100 text-base">Сообщение</h3>
+                    <p id="modalText" class="text-xs text-slate-400 mt-0.5">Текст сообщения...</p>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button id="modalCancelBtn" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl text-xs font-medium transition-colors hidden">Отмена</button>
+                <button id="modalOkBtn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold transition-colors">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer / Creator info -->
+    <footer class="bg-slate-900 border-t border-slate-800 py-3 text-center text-xs text-slate-500">
+        Герои Спорта 2026 &bull; Система контроля автотранспорта и парковки
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Raw dataset extracted from the document
+        const rawVehicleData = [
+            { category: "Букеты", brand: "Фольксваген", plate: "Н 331 АН 997", note: "Разгрузка" },
+            { category: "РПГ", brand: "Лексус", plate: "Н 819 НС 790", note: "" },
+            { category: "РПГ", brand: "Смарт", plate: "Н 755 НЕ 799", note: "" },
+            { category: "РПГ", brand: "БМВ", plate: "К 651 ВМ 797", note: "" },
+            { category: "РПГ", brand: "Джилли", plate: "Е 391 ВО 250", note: "" },
+            { category: "РПГ", brand: "Хендай", plate: "Р 166 ЕН 799", note: "" },
+            { category: "РПГ", brand: "Митсубиси", plate: "Р 590 НМ 77", note: "" },
+            { category: "РПГ", brand: "Санг Енг", plate: "О 642 СА 197", note: "" },
+            { category: "РПГ", brand: "Тойота", plate: "Х 679 ТУ 799", note: "" },
+            { category: "РПГ", brand: "БМВ", plate: "К 439 СН 797", note: "" },
+            { category: "Координатор по парковке", brand: "ГАС", plate: "С 640 УК 69", note: "" },
+            { category: "Координатор по парковке", brand: "Тойота", plate: "У 315 ОХ 197", note: "" },
+            { category: "Организаторы", brand: "Тойота", plate: "М 104 КУ 777", note: "О.Львова" },
+            { category: "Организаторы", brand: "Мерседес", plate: "Е 475 ОМ 198", note: "И.Тюкина" },
+            { category: "Организаторы", brand: "Лексус", plate: "Е 009 КК 150", note: "Ю.Гончар" },
+            { category: "Худ. Гимнастика", brand: "Хончи", plate: "А 778 МА 797", note: "" },
+            { category: "Худ. Гимнастика", brand: "БМВ", plate: "М 039 ОР 134", note: "" },
+            { category: "Хор «Гордость»", brand: "Лексус", plate: "М 362 ЕХ 797", note: "" },
+            { category: "«Тодес» студия", brand: "Geely", plate: "O 837 XE 790", note: "" },
+            { category: "Ледовое шоу La Skadi", brand: "Хендай", plate: "Е 184 АН 197", note: "" },
+            { category: "Арт балет \"Айседора\"", brand: "Ауди", plate: "A 955 ОВ 161", note: "" },
+            { category: "Каратэ", brand: "Инфинити", plate: "О 831 РО 799", note: "" },
+            { category: "Каратэ", brand: "Ниссан", plate: "В 968 ЕС 977", note: "" },
+            { category: "Динамит", brand: "Хавал", plate: "А 408 ТЕ 797", note: "" },
+            { category: "Д.Губерниев", brand: "БМВ", plate: "А 704 АА 150", note: "" },
+            { category: "Шаман", brand: "Мерседес", plate: "Х 845 ОМ 797", note: "" },
+            { category: "Шаман директор", brand: "Cadillac Escalade или Mercedes", plate: "Р 018 ЕС 977 или Т 018 ХЕ 797", note: "Будет одна из двух машин" },
+            { category: "Л.Лещенко", brand: "Мерседес", plate: "А 978 ЕХ 797", note: "" },
+            { category: "С.Павлиашвили", brand: "Кадиллак или Тойота ЛК", plate: "С 004 ОС 199 или Т 858 НВ 197", note: "Будет одна из двух машин" },
+            { category: "Л.Долина", brand: "Тойота", plate: "О 056 МР 77", note: "" },
+            { category: "Л.Долина директор", brand: "Хонда", plate: "К 902 ЕЕ 799", note: "" },
+            { category: "ST", brand: "БМВ", plate: "P 128 PP 190", note: "" },
+            { category: "М.Краймбрери", brand: "Кадиллак", plate: "В 087 УО 799", note: "" },
+            { category: "М.Краймбрери", brand: "ГАС", plate: "A 737 AA 96", note: "" },
+            { category: "М.Краймбрери", brand: "Шкода", plate: "О 964 МТ 196", note: "" },
+            { category: "М.Краймбрери", brand: "Киа", plate: "У 173 ВК 550", note: "" },
+            { category: "Валерия", brand: "Zeekr или Mersedes", plate: "С 836 ОО 977 или Н 602 СМ 797", note: "Будет одна из двух машин" },
+            { category: "Валерия директор", brand: "Киа или Ауди", plate: "С 777 ВО 250 или М 999 РЕ 34", note: "Будет одна из двух машин" },
+            { category: "Валерия гример", brand: "Лексус", plate: "Н 501 РВ 799", note: "" },
+            { category: "Валерия Чайка", brand: "ГАС", plate: "M 783 EC 977", note: "" },
+            { category: "Хор «Русский формат»", brand: "Jetoure Х70", plate: "Р 152 ОР 136", note: "" },
+            { category: "Хор «Русский формат»", brand: "Тойота", plate: "А 737 СУ 797", note: "" },
+            { category: "Ю.Гаврилова продюсер", brand: "FAW", plate: "Т 852 Н К 797", note: "" },
+            { category: "И.Николаев", brand: "Мерседес", plate: "А 828 АА 197", note: "" },
+            { category: "И.Николаев директор", brand: "Мерседес", plate: "Е 159 СЕ 799", note: "" },
+            { category: "И.Николаев музыкант", brand: "Хавал", plate: "О 735 ВЕ 977", note: "" },
+            { category: "И.Николаев музыкант", brand: "БМВ", plate: "О 748 КХ 21", note: "" },
+            { category: "Niti Dila", brand: "БМВ", plate: "Р 192 ХЕ 126", note: "" },
+            { category: "Зара", brand: "Мерседес", plate: "О 185 НХ 977", note: "" },
+            { category: "Зара гример", brand: "Киа", plate: "Н 702 ХА 790", note: "" },
+            { category: "Зара директор", brand: "Хавал", plate: "Х 269 ЕЕ 977", note: "" },
+            { category: "Миа Бойка", brand: "Мерседес", plate: "М 761 ВС 147", note: "" },
+            { category: "Сергей Филин", brand: "Мерседес", plate: "К 347 КР 777", note: "" },
+            { category: "А.Балыков", brand: "Ли 7", plate: "У 496 ТТ 797", note: "" },
+            { category: "Ансамбль «Асса»", brand: "БМВ", plate: "С 749 ММ 07", note: "" },
+            { category: "Ансамбль «Асса»", brand: "Мерседес", plate: "Е 535 АА 799", note: "" },
+            { category: "А.Апанасов", brand: "Мерседес", plate: "М 878 ЕМ 799", note: "Только на репетицию" },
+            { category: "А.Апанасов", brand: "Exeed RX", plate: "Х 588 УВ 797", note: "" },
+            { category: "С.Хоркина", brand: "Воях", plate: "Р 524 АЕ 997", note: "VIP спортсмен" },
+            { category: "М.Опалев", brand: "Фольксваген", plate: "О 269 СО 134", note: "VIP спортмен" },
+            { category: "Я.Ткалич", brand: "Шкода", plate: "Е 911 ЕН 790", note: "VIP спортсмен" },
+            { category: "Д.Носов", brand: "Фольксваген", plate: "М 591 КР 550", note: "VIP спортсмен" },
+            { category: "Сергеев Денис Анатольевич", brand: "Changan", plate: "С 760 ВН 977", note: "VIP гость" },
+            { category: "Полусмак Александра Михайловна", brand: "Рейнж Ровер Вог", plate: "У 194 НР 125", note: "VIP гость" },
+            { category: "Горобченко Вячеслав Владимирович", brand: "Zeekr", plate: "Н 098 ТТ 797", note: "VIP гость" },
+            { category: "Марушин Олег", brand: "Тойота", plate: "В 353 МО 199", note: "VIP гость" },
+            { category: "Марушина Марина", brand: "БМВ", plate: "Е 197 СК 799", note: "VIP гость" },
+            { category: "Марушин Игорь", brand: "Киа", plate: "К 142 КО 790", note: "VIP гость" },
+            { category: "Федечкина Галина Николаевна", brand: "Киа", plate: "У 863 ХН 750", note: "VIP гость" },
+            { category: "Гассиев Знаур Николаевич", brand: "Лексус дип", plate: "165 D 04 777", note: "VIP гость" },
+            { category: "Чернов Артур Игоревич", brand: "Воях", plate: "А 794 КА 977", note: "VIP гость" },
+            { category: "Кошевой Евгений Геннадиевич", brand: "КИА", plate: "Х 974 ЕН 977", note: "VIP гость" },
+            { category: "Никитина НС", brand: "Мазда", plate: "Р 305 МС 799", note: "VIP гость" },
+            { category: "Кузьменков Степан Юрьевич", brand: "Geely Cityray", plate: "Е 532 МС 977", note: "VIP гость" },
+            { category: "Терешкова Валентина Владимировна", brand: "Аурус", plate: "Е 215 КР 777", note: "VIP гость" },
+            { category: "Родионов Андрей Юрьевич", brand: "Мерседес", plate: "А 884 НЕ 797", note: "VIP гость" },
+            { category: "Дмитриева Лариса Ивановна", brand: "Мерседес", plate: "Т 006 МР 77", note: "VIP гость" },
+            { category: "Трутнева Наталья Сергеевна", brand: "Мерседес", plate: "О 300 ОО 177", note: "VIP гость" },
+            { category: "Трутнева Наталья Сергеевна", brand: "Тойота 200", plate: "М 955 СР 777", note: "VIP гость" },
+            { category: "Трутнева Наталья Сергеевна", brand: "Тойота хайленд", plate: "О 071 ОО 199", note: "VIP гость" },
+            { category: "Святенко Инна Юрьевна", brand: "Аурус сенат", plate: "А 117 МР 97", note: "VIP гость" },
+            { category: "Съемочная группа ВГТРК", brand: "Ford Focus", plate: "О 623 РА 799", note: "" },
+            { category: "Съемочная группа ВГТРК", brand: "Skoda Octavia", plate: "В 980 УО 799", note: "" },
+            { category: "Съемочная группа ВГТРК", brand: "Skoda Octavia", plate: "Т 418 УР 799", note: "" },
+            { category: "Съемочная группа ВГТРК", brand: "Skoda Octavia", plate: "Т 330 УР 799", note: "" },
+            { category: "Съемочная группа «Звезда»", brand: "Рено Дастер", plate: "Р 357 АН 977", note: "" },
+            { category: "Инвалид-колясочник", brand: "SsangYong", plate: "Е 317 ХУ 199", note: "От Д.Губерниева" }
+        ];
+
+        // State variables
+        let vehicles = [];
+        let activeTab = 'pending'; // 'pending' or 'arrived'
+        let viewMode = 'cards'; // 'cards' or 'table'
+        let searchQuery = '';
+        let selectedCategory = 'all';
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            initData();
+            setupEventListeners();
+            populateCategoryFilter();
+            render();
+        });
+
+        function initData() {
+            const saved = localStorage.getItem('heroes_sport_vehicles_2026');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    // Map with original + arrived status
+                    vehicles = rawVehicleData.map((item, index) => {
+                        const found = parsed.find(p => p.id === index);
+                        return {
+                            id: index,
+                            ...item,
+                            arrived: found ? found.arrived : false,
+                            arrivedAt: found ? found.arrivedAt : null
+                        };
+                    });
+                } catch (e) {
+                    console.error("Error loading localStorage", e);
+                    loadDefaultVehicles();
+                }
+            } else {
+                loadDefaultVehicles();
+            }
+        }
+
+        function loadDefaultVehicles() {
+            vehicles = rawVehicleData.map((item, index) => ({
+                id: index,
+                ...item,
+                arrived: false,
+                arrivedAt: null
+            }));
+            saveToStorage();
+        }
+
+        function saveToStorage() {
+            const stateToSave = vehicles.map(v => ({ id: v.id, arrived: v.arrived, arrivedAt: v.arrivedAt }));
+            localStorage.setItem('heroes_sport_vehicles_2026', JSON.stringify(stateToSave));
+        }
+
+        function setupEventListeners() {
+            // Search input
+            const searchInput = document.getElementById('searchInput');
+            const clearSearchBtn = document.getElementById('clearSearch');
+            
+            searchInput.addEventListener('input', (e) => {
+                searchQuery = e.target.value.trim().toLowerCase();
+                clearSearchBtn.classList.toggle('hidden', searchQuery === '');
+                render();
+            });
+
+            clearSearchBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                searchQuery = '';
+                clearSearchBtn.classList.add('hidden');
+                render();
+            });
+
+            // Category filter
+            document.getElementById('categoryFilter').addEventListener('change', (e) => {
+                selectedCategory = e.target.value;
+                render();
+            });
+
+            // Tabs
+            document.getElementById('tabPendingBtn').addEventListener('click', () => {
+                activeTab = 'pending';
+                updateTabStyles();
+                render();
+            });
+
+            document.getElementById('tabArrivedBtn').addEventListener('click', () => {
+                activeTab = 'arrived';
+                updateTabStyles();
+                render();
+            });
+
+            // View toggle
+            document.getElementById('toggleViewBtn').addEventListener('click', () => {
+                viewMode = viewMode === 'cards' ? 'table' : 'cards';
+                document.getElementById('viewBtnText').textContent = viewMode === 'cards' ? 'Таблица' : 'Карточки';
+                document.querySelector('#toggleViewBtn i').className = viewMode === 'cards' ? 'fa-solid fa-table-cells' : 'fa-solid fa-list';
+                render();
+            });
+
+            // Reset storage
+            document.getElementById('resetStorageBtn').addEventListener('click', () => {
+                showModal(
+                    'Сброс данных',
+                    'Вы действительно хотите сбросить все отметки о прибытии автомобилей?',
+                    () => {
+                        loadDefaultVehicles();
+                        render();
+                        showToast('Все отметки сброшены');
+                    },
+                    true
+                );
+            });
+
+            // Modal OK button
+            document.getElementById('modalOkBtn').addEventListener('click', () => {
+                closeModal();
+                if (modalCallback) modalCallback();
+            });
+
+            document.getElementById('modalCancelBtn').addEventListener('click', () => {
+                closeModal();
+            });
+        }
+
+        function updateTabStyles() {
+            const pendingBtn = document.getElementById('tabPendingBtn');
+            const arrivedBtn = document.getElementById('tabArrivedBtn');
+
+            if (activeTab === 'pending') {
+                pendingBtn.className = "pb-3 border-b-2 border-indigo-500 text-indigo-400 flex items-center gap-2 transition-colors";
+                arrivedBtn.className = "pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition-colors";
+            } else {
+                arrivedBtn.className = "pb-3 border-b-2 border-emerald-500 text-emerald-400 flex items-center gap-2 transition-colors";
+                pendingBtn.className = "pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition-colors";
+            }
+        }
+
+        function populateCategoryFilter() {
+            const categories = [...new Set(rawVehicleData.map(v => v.category))].sort();
+            const select = document.getElementById('categoryFilter');
+            categories.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat;
+                select.appendChild(opt);
+            });
+        }
+
+        function render() {
+            // Update stats
+            const totalCount = vehicles.length;
+            const arrivedCount = vehicles.filter(v => v.arrived).length;
+            const pendingCount = totalCount - arrivedCount;
+
+            document.getElementById('statTotal').textContent = totalCount;
+            document.getElementById('statArrived').textContent = arrivedCount;
+            document.getElementById('statPending').textContent = pendingCount;
+            document.getElementById('badgePending').textContent = pendingCount;
+            document.getElementById('badgeArrived').textContent = arrivedCount;
+
+            // Filter vehicles
+            const filtered = vehicles.filter(v => {
+                const matchesTab = activeTab === 'pending' ? !v.arrived : v.arrived;
+                const matchesCategory = selectedCategory === 'all' || v.category === selectedCategory;
+                const matchesSearch = searchQuery === '' || 
+                    v.plate.toLowerCase().includes(searchQuery) ||
+                    v.brand.toLowerCase().includes(searchQuery) ||
+                    v.category.toLowerCase().includes(searchQuery) ||
+                    v.note.toLowerCase().includes(searchQuery);
+                
+                return matchesTab && matchesCategory && matchesSearch;
+            });
+
+            const container = document.getElementById('vehiclesContainer');
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-slate-800 border border-slate-700 rounded-2xl p-10 text-center space-y-3 mt-4">
+                        <div class="text-4xl text-slate-600">
+                            <i class="fa-solid fa-car-tunnel"></i>
+                        </div>
+                        <h3 class="text-slate-300 font-bold text-base">Автомобили не найдены</h3>
+                        <p class="text-xs text-slate-500 max-w-sm mx-auto">
+                            ${searchQuery || selectedCategory !== 'all' ? 'Попробуйте изменить параметры поиска или фильтрации.' : 'В этом списке пока нет автомобилей.'}
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            if (viewMode === 'cards') {
+                renderCards(filtered, container);
+            } else {
+                renderTable(filtered, container);
+            }
+        }
+
+        function renderCards(items, container) {
+            let html = '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">';
+            
+            items.forEach(v => {
+                const isVip = v.note.includes('VIP') || v.category.includes('VIP');
+                const badgeClass = isVip ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30';
+                
+                html += `
+                    <div class="bg-slate-800 border ${v.arrived ? 'border-emerald-600/40 bg-slate-800/90' : 'border-slate-700'} rounded-2xl p-4 shadow-md flex flex-col justify-between transition-all hover:border-slate-600">
+                        <div>
+                            <div class="flex justify-between items-start gap-2 mb-2">
+                                <span class="text-[11px] font-semibold px-2.5 py-1 rounded-lg border ${badgeClass} uppercase tracking-wide truncate max-w-[200px]">
+                                    ${escapeHtml(v.category)}
+                                </span>
+                                <span class="text-xs font-mono text-slate-400 bg-slate-900/60 px-2 py-0.5 rounded border border-slate-700/50">
+                                    #${v.id + 1}
+                                </span>
+                            </div>
+                            
+                            <div class="my-2">
+                                <div class="text-lg font-bold text-slate-100 tracking-wide font-mono bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-700 text-center shadow-inner">
+                                    ${escapeHtml(v.plate)}
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between text-sm text-slate-300 mt-2 px-1">
+                                <span class="font-medium flex items-center gap-1.5"><i class="fa-solid fa-car text-slate-400"></i> ${escapeHtml(v.brand)}</span>
+                                ${v.note ? `<span class="text-xs text-amber-400/90 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">${escapeHtml(v.note)}</span>` : ''}
+                            </div>
+                            ${v.arrived && v.arrivedAt ? `<div class="text-[11px] text-emerald-400 mt-2 px-1"><i class="fa-solid fa-check mr-1"></i>Прибыл: ${v.arrivedAt}</div>` : ''}
+                        </div>
+
+                        <div class="mt-4 pt-3 border-t border-slate-700/60 flex items-center justify-between">
+                            <span class="text-xs ${v.arrived ? 'text-emerald-400 font-medium' : 'text-slate-400'}">
+                                ${v.arrived ? '<i class="fa-solid fa-circle-check mr-1"></i>На площадке' : 'Ожидается'}
+                            </span>
+                            <button onclick="toggleArrival(${v.id})" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 ${v.arrived ? 'bg-slate-700 hover:bg-slate-600 text-slate-200' : 'bg-emerald-600 hover:bg-emerald-500 text-white'}">
+                                ${v.arrived ? '<i class="fa-solid fa-rotate-left"></i> Вернуть' : '<i class="fa-solid fa-check"></i> Приехал'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function renderTable(items, container) {
+            let html = `
+                <div class="bg-slate-800 border border-slate-700 rounded-2xl overflow-hidden shadow-lg">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="bg-slate-900/80 border-b border-slate-700 text-slate-400 text-xs uppercase tracking-wider">
+                                    <th class="py-3 px-4">№</th>
+                                    <th class="py-3 px-4">Категория / Лицо</th>
+                                    <th class="py-3 px-4">Марка авто</th>
+                                    <th class="py-3 px-4">Гос. номер</th>
+                                    <th class="py-3 px-4">Примечание</th>
+                                    <th class="py-3 px-4 text-center">Статус</th>
+                                    <th class="py-3 px-4 text-right">Действие</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-700/60 text-slate-200">
+            `;
+
+            items.forEach((v, index) => {
+                html += `
+                    <tr class="hover:bg-slate-750 transition-colors">
+                        <td class="py-3 px-4 text-slate-500 font-mono text-xs">${index + 1}</td>
+                        <td class="py-3 px-4 font-medium">${escapeHtml(v.category)}</td>
+                        <td class="py-3 px-4 text-slate-300">${escapeHtml(v.brand)}</td>
+                        <td class="py-3 px-4 font-mono font-bold tracking-wide">${escapeHtml(v.plate)}</td>
+                        <td class="py-3 px-4 text-xs text-amber-400">${escapeHtml(v.note)}</td>
+                        <td class="py-3 px-4 text-center">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${v.arrived ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-slate-700 text-slate-400'}">
+                                ${v.arrived ? 'Прибыл' : 'Ожидание'}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-right">
+                            <button onclick="toggleArrival(${v.id})" class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-sm ${v.arrived ? 'bg-slate-700 hover:bg-slate-600 text-slate-200' : 'bg-emerald-600 hover:bg-emerald-500 text-white'}">
+                                ${v.arrived ? 'Вернуть' : 'Приехал'}
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+        }
+
+        function toggleArrival(id) {
+            const v = vehicles.find(item => item.id === id);
+            if (v) {
+                v.arrived = !v.arrived;
+                if (v.arrived) {
+                    const now = new Date();
+                    v.arrivedAt = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    showToast(`Авто ${v.plate} отмечено как прибывшее`);
+                } else {
+                    v.arrivedAt = null;
+                    showToast(`Авто ${v.plate} возвращено в ожидающие`);
+                }
+                saveToStorage();
+                render();
+            }
+        }
+
+        // Custom Modal helper
+        let modalCallback = null;
+        function showModal(title, text, callback, showCancel = false) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalText').textContent = text;
+            modalCallback = callback;
+            
+            const cancelBtn = document.getElementById('modalCancelBtn');
+            cancelBtn.classList.toggle('hidden', !showCancel);
+            
+            document.getElementById('customModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('customModal').classList.add('hidden');
+            modalCallback = null;
+        }
+
+        // Simple toast notification popup
+        function showToast(message) {
+            const existingToast = document.getElementById('toastNotification');
+            if (existingToast) existingToast.remove();
+
+            const toast = document.createElement('div');
+            toast.id = 'toastNotification';
+            toast.className = 'fixed bottom-6 right-6 z-50 bg-slate-800 border border-slate-700 text-slate-100 px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-xs sm:text-sm animate-bounce';
+            toast.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 text-base"></i><span>${escapeHtml(message)}</span>`;
+            
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                if (toast.parentElement) toast.remove();
+            }, 3000);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+    </script>
+</body>
+</html>
