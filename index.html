@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Парковка • Лайв Арена • Герои Спорта 2026</title>
+    <title>Парковка • Лайв Арена • Система контроля</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -30,7 +30,9 @@
             <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full lg:w-auto justify-between sm:justify-start">
                 <div>
                     <div class="flex items-center gap-2 flex-wrap">
-                        <span class="bg-indigo-600 text-white text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Герои Спорта 2026</span>
+                        <span id="eventBadgeDisplay" onclick="openEventTitleModal()" title="Нажмите, чтобы изменить название мероприятия" class="bg-indigo-600 hover:bg-indigo-500 cursor-pointer text-white text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider transition-colors">
+                            Герои Спорта 2026
+                        </span>
                         
                         <!-- Venue Selector -->
                         <div class="flex items-center bg-slate-900 border border-slate-700 rounded-full px-2.5 py-0.5 text-xs text-slate-200">
@@ -43,7 +45,15 @@
                             </button>
                         </div>
                     </div>
-                    <h1 class="text-lg sm:text-xl font-bold text-white tracking-tight mt-0.5">«Мы верим твердо в героев спорта»</h1>
+
+                    <div class="flex items-center gap-2 mt-0.5 group">
+                        <h1 id="eventTitleDisplay" onclick="openEventTitleModal()" class="text-lg sm:text-xl font-bold text-white tracking-tight cursor-pointer hover:text-indigo-300 transition-colors">
+                            «Мы верим твердо в героев спорта»
+                        </h1>
+                        <button onclick="openEventTitleModal()" title="Редактировать название мероприятия" class="text-slate-400 hover:text-indigo-400 text-xs p-1 rounded-lg bg-slate-900/60 border border-slate-700/80 transition-colors">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Date & Archive Picker -->
@@ -72,18 +82,18 @@
                     </div>
                     <div class="h-5 w-px bg-slate-700"></div>
                     <div class="text-center px-1.5">
+                        <span id="statPending" class="block font-bold text-amber-400">0</span>
+                        <span class="text-slate-400 text-[10px] uppercase">Ждем</span>
+                    </div>
+                    <div class="h-5 w-px bg-slate-700"></div>
+                    <div class="text-center px-1.5">
                         <span id="statArrived" class="block font-bold text-emerald-400">0</span>
                         <span class="text-slate-400 text-[10px] uppercase">Тут</span>
                     </div>
                     <div class="h-5 w-px bg-slate-700"></div>
                     <div class="text-center px-1.5">
-                        <span id="statTransit" class="block font-bold text-blue-400">0</span>
-                        <span class="text-slate-400 text-[10px] uppercase">В пути</span>
-                    </div>
-                    <div class="h-5 w-px bg-slate-700"></div>
-                    <div class="text-center px-1.5">
-                        <span id="statPending" class="block font-bold text-amber-400">0</span>
-                        <span class="text-slate-400 text-[10px] uppercase">Ждем</span>
+                        <span id="statDeparted" class="block font-bold text-slate-400">0</span>
+                        <span class="text-slate-500 text-[10px] uppercase">Убыли</span>
                     </div>
                 </div>
             </div>
@@ -93,45 +103,36 @@
     <!-- Main Content Container -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-4 sm:px-6 lg:px-8 flex flex-col gap-4">
 
-        <!-- Shift Managers & Contacts Bar -->
-        <div class="bg-slate-800/90 border border-slate-700 rounded-2xl p-3 sm:p-4 shadow-md flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3 text-xs">
-            <div class="flex items-center gap-2.5 flex-wrap w-full xl:w-auto">
-                <span class="font-semibold text-indigo-400 flex items-center gap-1.5">
-                    <i class="fa-solid fa-user-shield"></i> Ответственные смены:
-                </span>
-
-                <!-- Primary Responsible Selector -->
-                <div class="flex items-center gap-1.5 bg-slate-900 px-2.5 py-1.5 rounded-xl border border-slate-700">
-                    <span class="text-slate-400">Ст. смены:</span>
-                    <select id="leadStaffSelect" onchange="handleStaffShiftChange()" class="bg-transparent text-slate-100 font-semibold focus:outline-none cursor-pointer"></select>
-                    <a id="leadStaffCallBtn" href="#" title="Позвонить старшему смены" class="ml-1 w-6 h-6 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 flex items-center justify-center transition-colors">
-                        <i class="fa-solid fa-phone text-[10px]"></i>
-                    </a>
+        <!-- Shift Managers & Zone Assignment Bar -->
+        <div class="bg-slate-800/90 border border-slate-700 rounded-2xl p-3 sm:p-4 shadow-md flex flex-col gap-3 text-xs">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
+                
+                <!-- Active Duty Filter Selector -->
+                <div class="flex items-center gap-2 flex-wrap w-full lg:w-auto">
+                    <span class="font-semibold text-indigo-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-user-shield"></i> Пост / Смена:
+                    </span>
+                    <select id="activeStaffFilterSelect" onchange="handleActiveStaffFilterChange(this.value)" class="bg-slate-900 border border-slate-700 text-slate-100 font-semibold rounded-xl px-3 py-1.5 focus:outline-none focus:border-indigo-500 cursor-pointer">
+                        <option value="all">🌐 Все ответственные (Все зоны)</option>
+                    </select>
+                    <button onclick="openContactsModal(true)" class="px-2.5 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-300 rounded-xl font-semibold transition-colors flex items-center gap-1" title="Добавить ответственного и назначить зону">
+                        <i class="fa-solid fa-user-plus"></i> <span>+ Добавить ответственного</span>
+                    </button>
                 </div>
 
-                <!-- Duty / Checkpoint Responsible Selector -->
-                <div class="flex items-center gap-1.5 bg-slate-900 px-2.5 py-1.5 rounded-xl border border-slate-700">
-                    <span class="text-slate-400">Дежурный КПП:</span>
-                    <select id="dutyStaffSelect" onchange="handleStaffShiftChange()" class="bg-transparent text-slate-100 font-semibold focus:outline-none cursor-pointer"></select>
-                    <a id="dutyStaffCallBtn" href="#" title="Позвонить дежурному" class="ml-1 w-6 h-6 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 flex items-center justify-center transition-colors">
-                        <i class="fa-solid fa-phone text-[10px]"></i>
-                    </a>
+                <!-- Telegram & Contacts Modal Trigger -->
+                <div class="flex items-center gap-2 w-full lg:w-auto justify-end flex-wrap">
+                    <button onclick="openTelegramExportModal()" class="px-3 py-1.5 bg-blue-600/30 hover:bg-blue-600/50 border border-blue-500/40 text-blue-300 rounded-xl font-medium transition-colors flex items-center gap-1.5">
+                        <i class="fa-brands fa-telegram"></i> Отчет в Telegram
+                    </button>
+                    <button onclick="openContactsModal(false)" class="px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 text-indigo-300 rounded-xl font-medium transition-colors flex items-center gap-1.5">
+                        <i class="fa-solid fa-users-gear"></i> Настройка смены (<span id="contactsCountBadge">4</span>)
+                    </button>
                 </div>
-
-                <!-- Add New Staff Button -->
-                <button onclick="openContactsModal(true)" class="px-2.5 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl font-medium transition-colors flex items-center gap-1" title="Добавить ответственного в список">
-                    <i class="fa-solid fa-user-plus text-indigo-400"></i> <span>+ Сотрудник</span>
-                </button>
             </div>
 
-            <div class="flex items-center gap-2 w-full xl:w-auto justify-end flex-wrap">
-                <button onclick="openTelegramExportModal()" class="px-3 py-1.5 bg-blue-600/30 hover:bg-blue-600/50 border border-blue-500/40 text-blue-300 rounded-xl font-medium transition-colors flex items-center gap-1.5">
-                    <i class="fa-brands fa-telegram"></i> Отчет в Telegram
-                </button>
-                <button onclick="openContactsModal(false)" class="px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 text-indigo-300 rounded-xl font-medium transition-colors flex items-center gap-1.5">
-                    <i class="fa-solid fa-address-book"></i> Контакты (<span id="contactsCountBadge">4</span>)
-                </button>
-            </div>
+            <!-- Interactive Cards of On-Duty Staff with Assigned Zones -->
+            <div id="onDutyStaffCards" class="flex items-center gap-2 overflow-x-auto pb-1 pt-1 border-t border-slate-700/60"></div>
         </div>
 
         <!-- Controls Bar: Search, Filters, Actions -->
@@ -173,17 +174,14 @@
 
             <!-- Action buttons: Add Vehicle, Scanner, Upload, View switch & Reset -->
             <div class="flex items-center gap-2 w-full lg:w-auto justify-end flex-wrap">
-                <!-- Add Vehicle manually -->
                 <button onclick="openAddVehicleModal()" title="Добавить автомобиль в зону" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs sm:text-sm font-semibold transition-colors flex items-center gap-1.5 shadow-sm">
                     <i class="fa-solid fa-plus"></i> Добавить авто
                 </button>
 
-                <!-- OCR / Photo Scanner trigger -->
                 <button onclick="openScannerModal()" title="Сканировать / Снять номер" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5 shadow-sm">
                     <i class="fa-solid fa-camera"></i> Скан
                 </button>
 
-                <!-- Hidden file input for CSV/JSON upload -->
                 <input type="file" id="fileUploadInput" accept=".csv, .json, .txt" class="hidden" onchange="handleFileUpload(event)">
                 <button onclick="document.getElementById('fileUploadInput').click()" title="Загрузить список (CSV / JSON)" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5">
                     <i class="fa-solid fa-file-arrow-up"></i>
@@ -202,25 +200,31 @@
         <!-- Quick Zone Pills Bar -->
         <div id="zoneQuickPills" class="flex items-center gap-2 overflow-x-auto pb-1 text-xs"></div>
 
+        <!-- Active Staff Zone Lock Banner -->
+        <div id="staffZoneBanner" class="hidden bg-emerald-950/60 border border-emerald-500/30 rounded-xl px-4 py-2 text-xs text-emerald-300 flex items-center justify-between">
+            <span id="staffZoneBannerText"></span>
+            <button onclick="handleActiveStaffFilterChange('all')" class="text-emerald-400 hover:text-white underline font-semibold ml-2 whitespace-nowrap">Показать все зоны</button>
+        </div>
+
         <!-- Global Search Notice Banner -->
         <div id="globalSearchBanner" class="hidden bg-indigo-950/60 border border-indigo-500/30 rounded-xl px-4 py-2 text-xs text-indigo-300 flex items-center justify-between">
-            <span><i class="fa-solid fa-magnifying-glass mr-1.5"></i> Показаны результаты поиска <b>по всем вкладкам</b> (Ожидаются, В пути, На площадке)</span>
+            <span><i class="fa-solid fa-magnifying-glass mr-1.5"></i> Показаны результаты поиска <b>по всем вкладкам</b> (Ожидаются, На площадке, Убыли)</span>
             <button onclick="resetFilters()" class="text-indigo-400 hover:text-white underline font-semibold ml-2">Сбросить</button>
         </div>
 
-        <!-- Tabs Navigation (3 Status States) -->
+        <!-- Tabs Navigation (Pending / Arrived / Departed) -->
         <div class="flex border-b border-slate-700 gap-6 text-sm font-medium overflow-x-auto">
             <button id="tabPendingBtn" class="pb-3 border-b-2 border-amber-500 text-amber-400 flex items-center gap-2 transition-colors whitespace-nowrap">
                 <i class="fa-solid fa-hourglass-start"></i> Ожидаются 
                 <span id="badgePending" class="bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full text-xs font-bold">0</span>
             </button>
-            <button id="tabTransitBtn" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition-colors whitespace-nowrap">
-                <i class="fa-solid fa-car-side text-blue-400"></i> В пути / Задерживаются 
-                <span id="badgeTransit" class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full text-xs font-bold">0</span>
-            </button>
             <button id="tabArrivedBtn" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition-colors whitespace-nowrap">
                 <i class="fa-solid fa-square-check text-emerald-400"></i> На площадке 
                 <span id="badgeArrived" class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full text-xs font-bold">0</span>
+            </button>
+            <button id="tabDepartedBtn" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition-colors whitespace-nowrap">
+                <i class="fa-solid fa-flag-checkered text-slate-400"></i> Убыли 
+                <span id="badgeDeparted" class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full text-xs font-bold">0</span>
             </button>
         </div>
 
@@ -230,6 +234,32 @@
         </div>
 
     </main>
+
+    <!-- Event Name Edit Modal -->
+    <div id="eventTitleModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-slate-100 text-base flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-indigo-400"></i> Название мероприятия
+                </h3>
+                <button onclick="closeEventTitleModal()" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="handleEventTitleSubmit(event)" class="space-y-3 text-xs sm:text-sm">
+                <div>
+                    <label class="block text-slate-400 mb-1">Короткий бейдж (в шапке)</label>
+                    <input type="text" id="editEventBadgeInput" required placeholder="Например: Герои Спорта 2026" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Полное название мероприятия</label>
+                    <input type="text" id="editEventTitleInput" required placeholder="Например: «Мы верим твердо в героев спорта»" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-500">
+                </div>
+                <div class="flex justify-end gap-2 pt-2 border-t border-slate-700">
+                    <button type="button" onclick="closeEventTitleModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl text-xs font-medium">Отмена</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Add Vehicle Modal -->
     <div id="addVehicleModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
@@ -257,7 +287,7 @@
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-slate-400 mb-1">Зона (Лайв Арена) <span class="text-rose-400">*</span></label>
+                        <label class="block text-slate-400 mb-1">Зона парковки <span class="text-rose-400">*</span></label>
                         <select id="newSector" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-indigo-500">
                         </select>
                     </div>
@@ -267,13 +297,12 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block text-slate-400 mb-1">Примечание и статус</label>
+                    <label class="block text-slate-400 mb-1">Примечание и начальный статус</label>
                     <div class="flex gap-2">
                         <input type="text" id="newNote" placeholder="Комментарий (напр. Разгрузка, VIP)" class="flex-1 px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-500">
                         <select id="newStatus" class="px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-indigo-500">
                             <option value="pending">⏳ Ожидается</option>
                             <option value="arrived">✅ Сразу тут</option>
-                            <option value="transit">🚙 В пути</option>
                         </select>
                     </div>
                 </div>
@@ -287,38 +316,44 @@
         </div>
     </div>
 
-    <!-- Contacts & Staff Management Modal -->
+    <!-- Contacts & Staff Zone Assignment Modal -->
     <div id="contactsModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-center">
-                <h3 class="font-bold text-slate-100 text-base flex items-center gap-2">
-                    <i class="fa-solid fa-address-book text-indigo-400"></i> Ответственные и контакты смены
-                </h3>
+                <div>
+                    <h3 class="font-bold text-slate-100 text-base flex items-center gap-2">
+                        <i class="fa-solid fa-users-gear text-indigo-400"></i> Ответственные смены и закрепление зон
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Добавляйте сколько угодно сотрудников и назначайте каждому свою зону ответственности (или «Все зоны»).</p>
+                </div>
                 <button onclick="closeContactsModal()" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
-            <!-- List of Staff Contacts -->
+            <!-- List of Staff Contacts with Zone Selectors -->
             <div id="contactsListContainer" class="space-y-2 overflow-y-auto pr-1 flex-1 divide-y divide-slate-700/60 text-xs sm:text-sm"></div>
 
             <!-- Add New Contact Form -->
             <form id="addContactForm" onsubmit="handleAddContactSubmit(event)" class="bg-slate-900/90 border border-slate-700 rounded-xl p-3.5 space-y-3">
                 <div class="text-xs font-semibold text-indigo-400 flex items-center gap-1.5">
-                    <i class="fa-solid fa-user-plus"></i> Добавить нового сотрудника / контакт
+                    <i class="fa-solid fa-user-plus"></i> Добавить ответственного в смену
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
                     <input type="text" id="contactNameInput" required placeholder="ФИО (напр. Иванов И.И.) *" class="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-indigo-500">
                     <input type="tel" id="contactPhoneInput" required placeholder="Телефон (+7999...) *" class="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 font-mono focus:outline-none focus:border-indigo-500">
                 </div>
-                <div class="flex gap-2 text-xs">
-                    <input type="text" id="contactRoleInput" placeholder="Роль / Пост (напр. Ответственный смены, КПП)" class="flex-1 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-indigo-500">
-                    <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold flex items-center gap-1.5 shrink-0">
-                        <i class="fa-solid fa-plus"></i> Добавить
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+                    <input type="text" id="contactRoleInput" placeholder="Должность / Пост (КПП, Координатор)" class="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-indigo-500">
+                    <select id="contactZoneInput" class="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-indigo-500">
+                        <option value="all">🌐 Все зоны</option>
+                    </select>
+                    <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-plus"></i> Добавить в смену
                     </button>
                 </div>
             </form>
 
             <div class="pt-1 flex justify-end">
-                <button onclick="closeContactsModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl text-xs font-semibold">Закрыть</button>
+                <button onclick="closeContactsModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl text-xs font-semibold">Готово</button>
             </div>
         </div>
     </div>
@@ -332,7 +367,7 @@
                 </h3>
                 <button onclick="closeTelegramExportModal()" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <p class="text-xs text-slate-400">Сводка сформирована с учетом площадки, зон и ответственных смены:</p>
+            <p class="text-xs text-slate-400">Сводка включает время прибытия/убытия, статистику по зонам и список ответственных:</p>
             <textarea id="telegramExportText" readonly class="w-full h-64 bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs font-mono text-slate-200 focus:outline-none"></textarea>
             <div class="flex justify-end gap-2 pt-2">
                 <button onclick="closeTelegramExportModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl text-xs font-medium">Закрыть</button>
@@ -354,7 +389,7 @@
                 <div class="w-16 h-16 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-2xl">
                     <i class="fa-solid fa-car-rear"></i>
                 </div>
-                <p class="text-xs text-slate-300">Сфотографируйте номер автомобиля или выберите снимок для автоматического поиска в базе</p>
+                <p class="text-xs text-slate-300">Сфотографируйте номер автомобиля или выберите снимок для быстрой отметки заезда/выезда</p>
                 <input type="file" id="plateCameraInput" accept="image/*" capture="environment" class="hidden" onchange="handleScannedPhoto(event)">
                 <button onclick="document.getElementById('plateCameraInput').click()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold">
                     <i class="fa-solid fa-camera-retro mr-1.5"></i> Сделать фото / Загрузить
@@ -392,12 +427,12 @@
 
     <!-- Footer -->
     <footer class="bg-slate-900 border-t border-slate-800 py-3 text-center text-xs text-slate-500">
-        Герои Спорта 2026 &bull; <span id="footerVenueText">Лайв Арена</span> &bull; Система контроля автотранспорта и зон парковки
+        <span id="footerEventBadge">Герои Спорта 2026</span> &bull; <span id="footerVenueText">Лайв Арена</span> &bull; Система контроля времени прибытия и убытия автотранспорта
     </footer>
 
     <!-- JavaScript Application Logic -->
     <script>
-        // Доступные зоны парковки для площадки
+        // Доступные зоны парковки
         const DEFAULT_ZONES = [
             "Стилобат",
             "VIP",
@@ -406,15 +441,15 @@
             "Служебная парковка"
         ];
 
-        // Штатный список ответственных смены
+        // Штатный список ответственных смены с поддержкой зон и флага участия в смене
         const defaultStaffList = [
-            { id: 'staff_1', name: 'Зломанов Олег Викторович', phone: '+79206931013', role: 'Технический менеджер' },
-            { id: 'staff_2', name: 'Дубовой Андрей Николаевич', phone: '+79858154850', role: 'Ответственный смены' },
-            { id: 'staff_3', name: 'Дубовой Алексей Николаевич', phone: '+79163637448', role: 'Ответственный смены' },
-            { id: 'staff_4', name: 'Смутный Богдан Сергеевич', phone: '+79601805290', role: 'Инженер / Координатор' }
+            { id: 'staff_1', name: 'Зломанов Олег Викторович', phone: '+79206931013', role: 'Технический менеджер', zone: 'all', onShift: true },
+            { id: 'staff_2', name: 'Дубовой Андрей Николаевич', phone: '+79858154850', role: 'Ответственный смены', zone: 'VIP', onShift: true },
+            { id: 'staff_3', name: 'Дубовой Алексей Николаевич', phone: '+79163637448', role: 'Ответственный смены', zone: 'Стилобат', onShift: true },
+            { id: 'staff_4', name: 'Смутный Богдан Сергеевич', phone: '+79601805290', role: 'Инженер / Координатор', zone: 'Деборкадер', onShift: true }
         ];
 
-        // Дефолтный список автомобилей с новыми зонами Лайв Арены
+        // Дефолтный список автомобилей
         const defaultRawData = [
             { category: "Букеты", brand: "Фольксваген", plate: "Н 331 АН 997", phone: "+7 (999) 111-22-33", sector: "Деборкадер", note: "Разгрузка" },
             { category: "РПГ", brand: "Лексус", plate: "Н 819 НС 790", phone: "+7 (999) 222-33-44", sector: "Стилобат", note: "" },
@@ -431,7 +466,6 @@
             { category: "Терешкова В.В.", brand: "Аурус", plate: "Е 215 КР 777", phone: "+7 (999) 456-66-55", sector: "VIP", note: "VIP гость" }
         ];
 
-        // Миграция старых названий зон (Зона А..Г) в актуальные зоны Лайв Арены
         const LEGACY_SECTOR_MAP = {
             "Зона А": "VIP",
             "Зона Б": "Стилобат",
@@ -439,21 +473,24 @@
             "Зона Г": "Служебная парковка"
         };
 
-        const BASE_LIST_KEY = 'heroes_custom_base_list_v3';
-        const STAFF_LIST_KEY = 'heroes_staff_contacts_v1';
+        const BASE_LIST_KEY = 'heroes_custom_base_list_v4';
+        const STAFF_LIST_KEY = 'heroes_staff_contacts_v2';
         const VENUES_LIST_KEY = 'heroes_venues_list_v1';
+        const EVENT_INFO_KEY = 'heroes_event_header_info_v1';
 
         let zonesList = [...DEFAULT_ZONES];
         let staffList = loadStaffList();
         let venuesList = loadVenuesList();
         let currentVenue = venuesList[0] || 'Лайв Арена';
+        let eventInfo = loadEventInfo();
         let rawVehicleData = loadBaseTemplate();
         let vehicles = [];
-        let activeTab = 'pending'; // 'pending' | 'transit' | 'arrived'
+        let activeTab = 'pending'; // 'pending' | 'arrived' | 'departed'
         let viewMode = 'cards';
         let searchQuery = '';
         let selectedCategory = 'all';
         let selectedSector = 'all';
+        let activeStaffFilterId = 'all'; // ID выбранного ответственного для фильтрации его зоны
         let currentDate = getTodayLocalDate();
 
         function getTodayLocalDate() {
@@ -463,9 +500,64 @@
             return local.toISOString().split('T')[0];
         }
 
+        function getNowTimeStr() {
+            return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
         function normalizeSectorName(sector) {
             if (!sector) return 'Стилобат';
             return LEGACY_SECTOR_MAP[sector] || sector;
+        }
+
+        function loadEventInfo() {
+            try {
+                const saved = localStorage.getItem(EVENT_INFO_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed.badge && parsed.title) return parsed;
+                }
+            } catch (e) {
+                console.warn(e);
+            }
+            return {
+                badge: 'Герои Спорта 2026',
+                title: '«Мы верим твердо в героев спорта»'
+            };
+        }
+
+        function saveEventInfo() {
+            localStorage.setItem(EVENT_INFO_KEY, JSON.stringify(eventInfo));
+        }
+
+        function renderEventHeader() {
+            document.getElementById('eventBadgeDisplay').textContent = eventInfo.badge;
+            document.getElementById('eventTitleDisplay').textContent = eventInfo.title;
+            document.getElementById('footerEventBadge').textContent = eventInfo.badge;
+            document.title = `Парковка • ${currentVenue} • ${eventInfo.badge}`;
+        }
+
+        function openEventTitleModal() {
+            document.getElementById('editEventBadgeInput').value = eventInfo.badge;
+            document.getElementById('editEventTitleInput').value = eventInfo.title;
+            document.getElementById('eventTitleModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('editEventTitleInput').focus(), 100);
+        }
+
+        function closeEventTitleModal() {
+            document.getElementById('eventTitleModal').classList.add('hidden');
+        }
+
+        function handleEventTitleSubmit(e) {
+            e.preventDefault();
+            const badge = document.getElementById('editEventBadgeInput').value.trim();
+            const title = document.getElementById('editEventTitleInput').value.trim();
+            if (badge && title) {
+                eventInfo = { badge, title };
+                saveEventInfo();
+                renderEventHeader();
+                closeEventTitleModal();
+                showToast('Название мероприятия обновлено');
+            }
         }
 
         function loadStaffList() {
@@ -473,7 +565,13 @@
                 const saved = localStorage.getItem(STAFF_LIST_KEY);
                 if (saved) {
                     const parsed = JSON.parse(saved);
-                    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        return parsed.map(p => ({
+                            ...p,
+                            zone: p.zone || 'all',
+                            onShift: p.onShift !== undefined ? p.onShift : true
+                        }));
+                    }
                 }
             } catch (e) {
                 console.warn(e);
@@ -514,7 +612,6 @@
             return [...defaultRawData];
         }
 
-        // Умная нормализация госномеров и поиска
         function normalizeSearch(str) {
             if (!str) return '';
             const latToCyr = {
@@ -533,25 +630,24 @@
                 if (!e.target.value) return;
                 currentDate = e.target.value;
                 initDataForDate(currentDate);
-                loadShiftSelectionForDate(currentDate);
                 populateCategoryFilter();
                 populateSectorSelectors();
+                renderStaffSection();
                 render();
                 showToast(`Загружены данные за ${currentDate}`);
             });
 
+            renderEventHeader();
             renderVenueSelector();
-            renderStaffSelectors();
             fetchWeather();
             initDataForDate(currentDate);
-            loadShiftSelectionForDate(currentDate);
             setupEventListeners();
             populateCategoryFilter();
             populateSectorSelectors();
+            renderStaffSection();
             render();
         });
 
-        // Управление площадками (Лайв Арена и др.)
         function renderVenueSelector() {
             const select = document.getElementById('venueSelect');
             select.innerHTML = '';
@@ -570,7 +666,7 @@
             currentVenue = newVenue;
             document.getElementById('weatherCity').textContent = currentVenue;
             document.getElementById('footerVenueText').textContent = currentVenue;
-            saveShiftSelectionForDate(currentDate);
+            renderEventHeader();
             showToast(`Площадка: ${currentVenue}`);
         }
 
@@ -584,104 +680,88 @@
                 }
                 currentVenue = clean;
                 renderVenueSelector();
-                saveShiftSelectionForDate(currentDate);
+                renderEventHeader();
                 showToast(`Выбрана площадка: ${clean}`);
             }
         }
 
-        // Управление ответственными смены
-        function renderStaffSelectors() {
-            const leadSelect = document.getElementById('leadStaffSelect');
-            const dutySelect = document.getElementById('dutyStaffSelect');
-            const prevLead = leadSelect.value;
-            const prevDuty = dutySelect.value;
+        // Отрисовка панели ответственных смены и фильтрации по их зонам
+        function renderStaffSection() {
+            const filterSelect = document.getElementById('activeStaffFilterSelect');
+            const cardsContainer = document.getElementById('onDutyStaffCards');
+            const onShiftStaff = staffList.filter(s => s.onShift);
 
-            leadSelect.innerHTML = '';
-            dutySelect.innerHTML = '';
+            document.getElementById('contactsCountBadge').textContent = onShiftStaff.length;
 
-            staffList.forEach((person) => {
-                const opt1 = document.createElement('option');
-                opt1.value = person.id;
-                opt1.textContent = person.name;
-                leadSelect.appendChild(opt1);
-
-                const opt2 = document.createElement('option');
-                opt2.value = person.id;
-                opt2.textContent = person.name;
-                dutySelect.appendChild(opt2);
+            // Заполняем селектор «Пост / Смена»
+            filterSelect.innerHTML = '<option value="all">🌐 Все ответственные (Все зоны)</option>';
+            onShiftStaff.forEach(person => {
+                const zoneLabel = person.zone === 'all' ? 'Все зоны' : person.zone;
+                const opt = document.createElement('option');
+                opt.value = person.id;
+                opt.textContent = `👤 ${person.name} — [${zoneLabel}]`;
+                if (person.id === activeStaffFilterId) opt.selected = true;
+                filterSelect.appendChild(opt);
             });
 
-            if (staffList.some(s => s.id === prevLead)) leadSelect.value = prevLead;
-            else if (staffList[0]) leadSelect.value = staffList[0].id;
+            // Отрисовываем интерактивные плашки дежурных
+            let cardsHtml = `
+                <button onclick="handleActiveStaffFilterChange('all')" class="px-3 py-1.5 rounded-xl border text-xs font-medium transition-all whitespace-nowrap flex items-center gap-1.5 ${activeStaffFilterId === 'all' ? 'bg-indigo-600 text-white border-indigo-500 shadow-sm' : 'bg-slate-900 text-slate-300 border-slate-700 hover:border-slate-600'}">
+                    <i class="fa-solid fa-layer-group"></i> Все смены (${onShiftStaff.length})
+                </button>
+            `;
 
-            if (staffList.some(s => s.id === prevDuty)) dutySelect.value = prevDuty;
-            else if (staffList[1]) dutySelect.value = staffList[1].id;
-            else if (staffList[0]) dutySelect.value = staffList[0].id;
+            onShiftStaff.forEach(person => {
+                const isSelected = activeStaffFilterId === person.id;
+                const zoneBadge = person.zone === 'all' ? 'Все зоны' : person.zone;
+                const cleanPhone = person.phone.replace(/[^\d+]/g, '');
 
-            document.getElementById('contactsCountBadge').textContent = staffList.length;
-            updateStaffCallLinks();
+                cardsHtml += `
+                    <div class="flex items-center bg-slate-900 border ${isSelected ? 'border-emerald-500 ring-1 ring-emerald-500/40' : 'border-slate-700'} rounded-xl p-1 pl-2.5 gap-2 whitespace-nowrap transition-all">
+                        <div onclick="handleActiveStaffFilterChange('${person.id}')" class="cursor-pointer flex items-center gap-2">
+                            <div>
+                                <div class="font-semibold text-slate-100 text-xs leading-tight">${escapeHtml(person.name)}</div>
+                                <div class="text-[10px] text-slate-400 flex items-center gap-1">
+                                    <span class="text-indigo-400 font-semibold">📍 ${escapeHtml(zoneBadge)}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="tel:${escapeHtml(cleanPhone)}" title="Позвонить: ${escapeHtml(person.name)} (${escapeHtml(person.phone)})" class="w-7 h-7 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 flex items-center justify-center transition-colors shrink-0">
+                            <i class="fa-solid fa-phone text-[10px]"></i>
+                        </a>
+                    </div>
+                `;
+            });
+
+            cardsContainer.innerHTML = cardsHtml;
         }
 
-        function updateStaffCallLinks() {
-            const leadId = document.getElementById('leadStaffSelect').value;
-            const dutyId = document.getElementById('dutyStaffSelect').value;
-            const leadPerson = staffList.find(s => s.id === leadId);
-            const dutyPerson = staffList.find(s => s.id === dutyId);
+        // Переключение на конкретного ответственного -> автоматически включает его зону
+        function handleActiveStaffFilterChange(staffId) {
+            activeStaffFilterId = staffId;
+            const banner = document.getElementById('staffZoneBanner');
+            const bannerText = document.getElementById('staffZoneBannerText');
 
-            const leadBtn = document.getElementById('leadStaffCallBtn');
-            const dutyBtn = document.getElementById('dutyStaffCallBtn');
-
-            if (leadPerson) {
-                leadBtn.href = `tel:${leadPerson.phone.replace(/[^\d+]/g, '')}`;
-                leadBtn.title = `Позвонить: ${leadPerson.name} (${leadPerson.phone})`;
-            }
-            if (dutyPerson) {
-                dutyBtn.href = `tel:${dutyPerson.phone.replace(/[^\d+]/g, '')}`;
-                dutyBtn.title = `Позвонить: ${dutyPerson.name} (${dutyPerson.phone})`;
-            }
-        }
-
-        function handleStaffShiftChange() {
-            updateStaffCallLinks();
-            saveShiftSelectionForDate(currentDate);
-            showToast('Ответственные смены обновлены');
-        }
-
-        function saveShiftSelectionForDate(dateStr) {
-            const metaKey = `heroes_shift_meta_${dateStr}`;
-            const payload = {
-                venue: currentVenue,
-                leadId: document.getElementById('leadStaffSelect').value,
-                dutyId: document.getElementById('dutyStaffSelect').value
-            };
-            localStorage.setItem(metaKey, JSON.stringify(payload));
-        }
-
-        function loadShiftSelectionForDate(dateStr) {
-            const metaKey = `heroes_shift_meta_${dateStr}`;
-            try {
-                const saved = localStorage.getItem(metaKey);
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    if (parsed.venue && venuesList.includes(parsed.venue)) {
-                        currentVenue = parsed.venue;
-                        renderVenueSelector();
-                    }
-                    if (parsed.leadId && staffList.some(s => s.id === parsed.leadId)) {
-                        document.getElementById('leadStaffSelect').value = parsed.leadId;
-                    }
-                    if (parsed.dutyId && staffList.some(s => s.id === parsed.dutyId)) {
-                        document.getElementById('dutyStaffSelect').value = parsed.dutyId;
-                    }
-                    updateStaffCallLinks();
+            if (staffId === 'all') {
+                selectedSector = 'all';
+                document.getElementById('sectorFilter').value = 'all';
+                banner.classList.add('hidden');
+            } else {
+                const person = staffList.find(s => s.id === staffId);
+                if (person) {
+                    selectedSector = person.zone || 'all';
+                    document.getElementById('sectorFilter').value = selectedSector;
+                    const zName = selectedSector === 'all' ? 'Все зоны площадки' : `Зона «${selectedSector}»`;
+                    bannerText.innerHTML = `<i class="fa-solid fa-user-check mr-1.5"></i> Режим ответственного: <b>${escapeHtml(person.name)}</b> &bull; Отображается: <b>${escapeHtml(zName)}</b>`;
+                    banner.classList.remove('hidden');
                 }
-            } catch (e) {
-                console.warn(e);
             }
+            renderStaffSection();
+            render();
         }
 
-        // Модальное окно контактов и добавления ответственного
         function openContactsModal(focusInput = false) {
+            populateSectorSelectors();
             renderContactsModalList();
             document.getElementById('contactsModal').classList.remove('hidden');
             if (focusInput) {
@@ -695,28 +775,39 @@
 
         function renderContactsModalList() {
             const container = document.getElementById('contactsListContainer');
+            const allZones = getAllActiveZones();
             let html = '';
+
             staffList.forEach(person => {
                 const cleanPhone = person.phone.replace(/[^\d+]/g, '');
+                const zoneOptions = [
+                    `<option value="all" ${person.zone === 'all' ? 'selected' : ''}>🌐 Все зоны</option>`,
+                    ...allZones.map(z => `<option value="${escapeHtml(z)}" ${person.zone === z ? 'selected' : ''}>📍 ${escapeHtml(z)}</option>`)
+                ].join('');
+
                 html += `
-                    <div class="py-2.5 flex items-center justify-between gap-2">
-                        <div>
-                            <div class="font-semibold text-slate-100">${escapeHtml(person.name)}</div>
-                            <div class="text-xs text-slate-400 flex items-center gap-2 mt-0.5">
-                                <span>${escapeHtml(person.role || 'Ответственный')}</span>
-                                <span>&bull;</span>
-                                <a href="tel:${escapeHtml(cleanPhone)}" class="text-indigo-400 font-mono hover:underline">${escapeHtml(person.phone)}</a>
+                    <div class="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                        <div class="flex items-start gap-2.5">
+                            <input type="checkbox" ${person.onShift ? 'checked' : ''} onchange="toggleStaffOnShift('${person.id}', this.checked)" title="Участвует в текущей смене" class="mt-1 w-4 h-4 rounded accent-indigo-600 cursor-pointer">
+                            <div>
+                                <div class="font-semibold text-slate-100 ${person.onShift ? '' : 'line-through text-slate-500'}">${escapeHtml(person.name)}</div>
+                                <div class="text-xs text-slate-400 flex items-center gap-2 flex-wrap mt-0.5">
+                                    <span>${escapeHtml(person.role || 'Ответственный')}</span>
+                                    <span>&bull;</span>
+                                    <a href="tel:${escapeHtml(cleanPhone)}" class="text-indigo-400 font-mono hover:underline">${escapeHtml(person.phone)}</a>
+                                </div>
                             </div>
                         </div>
-                        <div class="flex items-center gap-1.5">
+                        <div class="flex items-center gap-2 self-end sm:self-center">
+                            <select onchange="updateStaffZone('${person.id}', this.value)" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                                ${zoneOptions}
+                            </select>
                             <a href="tel:${escapeHtml(cleanPhone)}" title="Позвонить" class="w-8 h-8 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-xs transition-colors">
                                 <i class="fa-solid fa-phone"></i>
                             </a>
-                            ${staffList.length > 1 ? `
-                                <button onclick="deleteStaffContact('${person.id}')" title="Удалить контакт" class="w-8 h-8 rounded-lg bg-rose-900/30 hover:bg-rose-900/60 border border-rose-800/50 text-rose-300 flex items-center justify-center text-xs transition-colors">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
-                            ` : ''}
+                            <button onclick="deleteStaffContact('${person.id}')" title="Удалить сотрудника" class="w-8 h-8 rounded-lg bg-rose-900/30 hover:bg-rose-900/60 border border-rose-800/50 text-rose-300 flex items-center justify-center text-xs transition-colors">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
                         </div>
                     </div>
                 `;
@@ -724,11 +815,40 @@
             container.innerHTML = html;
         }
 
+        function toggleStaffOnShift(id, isChecked) {
+            const person = staffList.find(s => s.id === id);
+            if (person) {
+                person.onShift = isChecked;
+                if (!isChecked && activeStaffFilterId === id) {
+                    activeStaffFilterId = 'all';
+                    document.getElementById('staffZoneBanner').classList.add('hidden');
+                }
+                saveStaffList();
+                renderStaffSection();
+                renderContactsModalList();
+                render();
+            }
+        }
+
+        function updateStaffZone(id, newZone) {
+            const person = staffList.find(s => s.id === id);
+            if (person) {
+                person.zone = newZone;
+                saveStaffList();
+                renderStaffSection();
+                if (activeStaffFilterId === id) {
+                    handleActiveStaffFilterChange(id);
+                }
+                showToast(`Зона для ${person.name}: ${newZone === 'all' ? 'Все зоны' : newZone}`);
+            }
+        }
+
         function handleAddContactSubmit(e) {
             e.preventDefault();
             const name = document.getElementById('contactNameInput').value.trim();
             const phone = document.getElementById('contactPhoneInput').value.trim();
             const role = document.getElementById('contactRoleInput').value.trim() || 'Ответственный смены';
+            const zone = document.getElementById('contactZoneInput').value || 'all';
 
             if (!name || !phone) return;
 
@@ -736,44 +856,58 @@
                 id: 'staff_' + Date.now(),
                 name,
                 phone,
-                role
+                role,
+                zone,
+                onShift: true
             };
 
             staffList.push(newStaff);
             saveStaffList();
-            renderStaffSelectors();
+            renderStaffSection();
             renderContactsModalList();
             document.getElementById('addContactForm').reset();
-            showToast(`Контакт ${name} добавлен`);
+            showToast(`Добавлен ответственный: ${name}`);
         }
 
         function deleteStaffContact(id) {
+            if (staffList.length <= 1) {
+                showToast('В списке должен остаться хотя бы один ответственный');
+                return;
+            }
             staffList = staffList.filter(s => s.id !== id);
+            if (activeStaffFilterId === id) {
+                handleActiveStaffFilterChange('all');
+            }
             saveStaffList();
-            renderStaffSelectors();
+            renderStaffSection();
             renderContactsModalList();
-            saveShiftSelectionForDate(currentDate);
-            showToast('Контакт удален');
+            showToast('Сотрудник удален из списка');
         }
 
-        // Данные автомобилей за выбранную дату
+        // Загрузка и хранение автомобилей за дату (с временем прибытия и убытия)
         function initDataForDate(dateStr) {
-            const storageKey = `heroes_parking_archive_v2_${dateStr}`;
+            const storageKey = `heroes_parking_archive_v3_${dateStr}`;
             const saved = localStorage.getItem(storageKey);
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
-                    vehicles = parsed.map((item, index) => ({
-                        id: item.id !== undefined ? item.id : index,
-                        category: item.category || 'Без категории',
-                        brand: item.brand || '—',
-                        plate: item.plate || '—',
-                        phone: item.phone || '+7 (999) 000-00-00',
-                        sector: normalizeSectorName(item.sector),
-                        note: item.note || '',
-                        status: item.status || 'pending',
-                        timestamp: item.timestamp || null
-                    }));
+                    vehicles = parsed.map((item, index) => {
+                        // Миграция старого статуса 'transit' в 'pending'
+                        let st = item.status || 'pending';
+                        if (st === 'transit') st = 'pending';
+                        return {
+                            id: item.id !== undefined ? item.id : index,
+                            category: item.category || 'Без категории',
+                            brand: item.brand || '—',
+                            plate: item.plate || '—',
+                            phone: item.phone || '+7 (999) 000-00-00',
+                            sector: normalizeSectorName(item.sector),
+                            note: item.note || '',
+                            status: st,
+                            arrivedAt: item.arrivedAt || item.timestamp || null,
+                            departedAt: item.departedAt || null
+                        };
+                    });
                 } catch (e) {
                     loadDefaultVehiclesForDate();
                 }
@@ -789,13 +923,14 @@
                 ...item,
                 sector: normalizeSectorName(item.sector),
                 status: 'pending',
-                timestamp: null
+                arrivedAt: null,
+                departedAt: null
             }));
             saveToStorage();
         }
 
         function saveToStorage() {
-            const storageKey = `heroes_parking_archive_v2_${currentDate}`;
+            const storageKey = `heroes_parking_archive_v3_${currentDate}`;
             localStorage.setItem(storageKey, JSON.stringify(vehicles));
         }
 
@@ -891,6 +1026,15 @@
 
             document.getElementById('sectorFilter').addEventListener('change', (e) => {
                 selectedSector = e.target.value;
+                // Если пользователь вручную переключил зону, сбрасываем жесткую привязку к одному сотруднику
+                if (activeStaffFilterId !== 'all') {
+                    const person = staffList.find(s => s.id === activeStaffFilterId);
+                    if (person && person.zone !== selectedSector) {
+                        activeStaffFilterId = 'all';
+                        document.getElementById('staffZoneBanner').classList.add('hidden');
+                        renderStaffSection();
+                    }
+                }
                 render();
             });
 
@@ -900,14 +1044,14 @@
                 render();
             });
 
-            document.getElementById('tabTransitBtn').addEventListener('click', () => {
-                activeTab = 'transit';
+            document.getElementById('tabArrivedBtn').addEventListener('click', () => {
+                activeTab = 'arrived';
                 updateTabStyles();
                 render();
             });
 
-            document.getElementById('tabArrivedBtn').addEventListener('click', () => {
-                activeTab = 'arrived';
+            document.getElementById('tabDepartedBtn').addEventListener('click', () => {
+                activeTab = 'departed';
                 updateTabStyles();
                 render();
             });
@@ -922,7 +1066,7 @@
             document.getElementById('resetStorageBtn').addEventListener('click', () => {
                 showModal(
                     'Сброс данных смены',
-                    `Сбросить все отметки и вернуть исходный список за ${currentDate}?`,
+                    `Сбросить все отметки времени прибытия/убытия за ${currentDate}?`,
                     () => {
                         loadDefaultVehiclesForDate();
                         populateCategoryFilter();
@@ -949,20 +1093,30 @@
             searchQuery = '';
             selectedCategory = 'all';
             selectedSector = 'all';
+            activeStaffFilterId = 'all';
             document.getElementById('searchInput').value = '';
             document.getElementById('clearSearch').classList.add('hidden');
             document.getElementById('categoryFilter').value = 'all';
             document.getElementById('sectorFilter').value = 'all';
+            document.getElementById('staffZoneBanner').classList.add('hidden');
+            renderStaffSection();
             render();
         }
 
         function selectQuickZone(zone) {
             selectedSector = zone;
             document.getElementById('sectorFilter').value = zone;
+            if (activeStaffFilterId !== 'all') {
+                const person = staffList.find(s => s.id === activeStaffFilterId);
+                if (person && person.zone !== zone) {
+                    activeStaffFilterId = 'all';
+                    document.getElementById('staffZoneBanner').classList.add('hidden');
+                    renderStaffSection();
+                }
+            }
             render();
         }
 
-        // Голосовой поиск через Web Speech API
         function startVoiceSearch() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
@@ -999,7 +1153,6 @@
             recognition.start();
         }
 
-        // Добавление авто вручную по зонам
         function openAddVehicleModal() {
             document.getElementById('addVehicleForm').reset();
             populateSectorSelectors();
@@ -1025,9 +1178,7 @@
             const status = document.getElementById('newStatus').value;
 
             const newId = vehicles.length > 0 ? Math.max(...vehicles.map(v => v.id)) + 1 : 0;
-            const nowTime = (status === 'arrived' || status === 'transit')
-                ? new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                : null;
+            const nowTime = status === 'arrived' ? getNowTimeStr() : null;
 
             const newVehicle = {
                 id: newId,
@@ -1038,7 +1189,8 @@
                 sector,
                 note,
                 status,
-                timestamp: nowTime
+                arrivedAt: nowTime,
+                departedAt: null
             };
 
             vehicles.unshift(newVehicle);
@@ -1064,7 +1216,7 @@
         function handleScannedPhoto(event) {
             const file = event.target.files[0];
             if (!file) return;
-            const pool = vehicles.filter(v => v.status !== 'arrived');
+            const pool = vehicles.filter(v => v.status !== 'departed');
             const targetList = pool.length > 0 ? pool : vehicles;
             const randomVehicle = targetList[Math.floor(Math.random() * targetList.length)];
 
@@ -1075,10 +1227,10 @@
             resultText.textContent = `${randomVehicle.plate} (${randomVehicle.category} — ${randomVehicle.brand}, Зона: ${randomVehicle.sector})`;
             actionsBox.innerHTML = `
                 <button onclick="setStatus(${randomVehicle.id}, 'arrived'); closeScannerModal();" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold text-xs">
-                    ✅ На площадке
+                    ✅ Заехал (Прибыл)
                 </button>
-                <button onclick="setStatus(${randomVehicle.id}, 'transit'); closeScannerModal();" class="flex-1 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold text-xs">
-                    🚙 В пути
+                <button onclick="setStatus(${randomVehicle.id}, 'departed'); closeScannerModal();" class="flex-1 py-2 bg-slate-600 hover:bg-slate-500 text-white rounded-lg font-semibold text-xs">
+                    🏁 Выехал (Убыл)
                 </button>
             `;
             resultBox.classList.remove('hidden');
@@ -1088,42 +1240,47 @@
 
         function openTelegramExportModal() {
             const arrivedList = vehicles.filter(v => v.status === 'arrived');
-            const transitList = vehicles.filter(v => v.status === 'transit');
+            const departedList = vehicles.filter(v => v.status === 'departed');
             const pendingList = vehicles.filter(v => v.status === 'pending');
-
-            const leadId = document.getElementById('leadStaffSelect').value;
-            const dutyId = document.getElementById('dutyStaffSelect').value;
-            const leadPerson = staffList.find(s => s.id === leadId);
-            const dutyPerson = staffList.find(s => s.id === dutyId);
+            const onShiftStaff = staffList.filter(s => s.onShift);
             
-            let text = `🚗 *ОТЧЕТ ПО ПАРКОВКЕ — Герои Спорта 2026*\n`;
+            let text = `🚗 *ОТЧЕТ ПО ПАРКОВКЕ — ${eventInfo.badge}*\n`;
+            text += `🎬 Мероприятие: ${eventInfo.title}\n`;
             text += `📍 Площадка: *${currentVenue}*\n`;
-            text += `📅 Дата: ${currentDate}\n`;
-            if (leadPerson) text += `👤 Ст. смены: ${leadPerson.name} (${leadPerson.phone})\n`;
-            if (dutyPerson && dutyPerson.id !== leadId) text += `🛡 Дежурный КПП: ${dutyPerson.name} (${dutyPerson.phone})\n`;
-            text += `\n📊 *Статистика:*\n• Всего в графике: ${vehicles.length}\n• На площадке: ${arrivedList.length}\n• В пути: ${transitList.length}\n• Ожидаются: ${pendingList.length}\n\n`;
+            text += `📅 Дата: ${currentDate}\n\n`;
 
-            // Разбивка по зонам
+            if (onShiftStaff.length > 0) {
+                text += `👥 *Ответственные смены:*\n`;
+                onShiftStaff.forEach(p => {
+                    const zName = p.zone === 'all' ? 'Все зоны' : p.zone;
+                    text += ` • ${p.name} [${zName}] — ${p.phone}\n`;
+                });
+                text += `\n`;
+            }
+
+            text += `📊 *Статистика:*\n• Всего в списке: ${vehicles.length}\n• Ожидаются: ${pendingList.length}\n• На площадке: ${arrivedList.length}\n• Убыли: ${departedList.length}\n\n`;
+
             const allSectors = getAllActiveZones();
-            text += `🗺 *По зонам (На площадке / Всего):*\n`;
+            text += `🗺 *По зонам (На площадке / Убыли / Всего):*\n`;
             allSectors.forEach(zone => {
                 const inZoneTotal = vehicles.filter(v => v.sector === zone).length;
                 const inZoneArrived = arrivedList.filter(v => v.sector === zone).length;
+                const inZoneDeparted = departedList.filter(v => v.sector === zone).length;
                 if (inZoneTotal > 0) {
-                    text += ` • ${zone}: ${inZoneArrived} из ${inZoneTotal}\n`;
+                    text += ` • ${zone}: тут ${inZoneArrived} | убыли ${inZoneDeparted} | всего ${inZoneTotal}\n`;
                 }
             });
             
-            text += `\n✅ *На площадке (${arrivedList.length}):*\n`;
-            if (arrivedList.length === 0) text += ` — нет прибывших\n`;
+            text += `\n✅ *Сейчас на площадке (${arrivedList.length}):*\n`;
+            if (arrivedList.length === 0) text += ` — нет автомобилей\n`;
             arrivedList.forEach(v => {
-                text += ` • \`${v.plate}\` | ${v.category} (${v.brand}) [${v.sector}] — ${v.timestamp || '—'}\n`;
+                text += ` • \`${v.plate}\` | ${v.category} (${v.brand}) [${v.sector}] — заезд в ${v.arrivedAt || '—'}\n`;
             });
 
-            if (transitList.length > 0) {
-                text += `\n🚙 *В пути / Задерживаются (${transitList.length}):*\n`;
-                transitList.forEach(v => {
-                    text += ` • \`${v.plate}\` | ${v.category} (${v.brand}) [${v.sector}]\n`;
+            if (departedList.length > 0) {
+                text += `\n🏁 *Убыли с площадки (${departedList.length}):*\n`;
+                departedList.forEach(v => {
+                    text += ` • \`${v.plate}\` | ${v.category} (${v.brand}) [${v.sector}] — заезд: ${v.arrivedAt || '—'}, выезд: ${v.departedAt || '—'}\n`;
                 });
             }
 
@@ -1145,12 +1302,12 @@
 
         function updateTabStyles() {
             const pBtn = document.getElementById('tabPendingBtn');
-            const tBtn = document.getElementById('tabTransitBtn');
             const aBtn = document.getElementById('tabArrivedBtn');
+            const dBtn = document.getElementById('tabDepartedBtn');
 
             pBtn.className = "pb-3 border-b-2 " + (activeTab === 'pending' ? "border-amber-500 text-amber-400" : "border-transparent text-slate-400 hover:text-slate-200") + " flex items-center gap-2 transition-colors whitespace-nowrap";
-            tBtn.className = "pb-3 border-b-2 " + (activeTab === 'transit' ? "border-blue-500 text-blue-400" : "border-transparent text-slate-400 hover:text-slate-200") + " flex items-center gap-2 transition-colors whitespace-nowrap";
             aBtn.className = "pb-3 border-b-2 " + (activeTab === 'arrived' ? "border-emerald-500 text-emerald-400" : "border-transparent text-slate-400 hover:text-slate-200") + " flex items-center gap-2 transition-colors whitespace-nowrap";
+            dBtn.className = "pb-3 border-b-2 " + (activeTab === 'departed' ? "border-indigo-400 text-indigo-300" : "border-transparent text-slate-400 hover:text-slate-200") + " flex items-center gap-2 transition-colors whitespace-nowrap";
         }
 
         function getAllActiveZones() {
@@ -1179,6 +1336,17 @@
                     opt.value = z;
                     opt.textContent = z;
                     modalSelect.appendChild(opt);
+                });
+            }
+
+            const contactZoneSelect = document.getElementById('contactZoneInput');
+            if (contactZoneSelect) {
+                contactZoneSelect.innerHTML = '<option value="all">🌐 Все зоны</option>';
+                allZones.forEach(z => {
+                    const opt = document.createElement('option');
+                    opt.value = z;
+                    opt.textContent = `📍 ${z}`;
+                    contactZoneSelect.appendChild(opt);
                 });
             }
         }
@@ -1249,14 +1417,14 @@
 
         function render() {
             const totalCount = vehicles.length;
-            const arrivedTotal = vehicles.filter(v => v.status === 'arrived').length;
-            const transitTotal = vehicles.filter(v => v.status === 'transit').length;
             const pendingTotal = vehicles.filter(v => v.status === 'pending').length;
+            const arrivedTotal = vehicles.filter(v => v.status === 'arrived').length;
+            const departedTotal = vehicles.filter(v => v.status === 'departed').length;
 
             document.getElementById('statTotal').textContent = totalCount;
-            document.getElementById('statArrived').textContent = arrivedTotal;
-            document.getElementById('statTransit').textContent = transitTotal;
             document.getElementById('statPending').textContent = pendingTotal;
+            document.getElementById('statArrived').textContent = arrivedTotal;
+            document.getElementById('statDeparted').textContent = departedTotal;
 
             renderQuickZonePills();
 
@@ -1268,8 +1436,8 @@
             });
 
             document.getElementById('badgePending').textContent = matchingCriteria.filter(v => v.status === 'pending').length;
-            document.getElementById('badgeTransit').textContent = matchingCriteria.filter(v => v.status === 'transit').length;
             document.getElementById('badgeArrived').textContent = matchingCriteria.filter(v => v.status === 'arrived').length;
+            document.getElementById('badgeDeparted').textContent = matchingCriteria.filter(v => v.status === 'departed').length;
 
             const isSearching = searchQuery !== '';
             document.getElementById('globalSearchBanner').classList.toggle('hidden', !isSearching);
@@ -1285,15 +1453,15 @@
                     <div class="bg-slate-800 border border-slate-700 rounded-2xl p-10 text-center space-y-3 mt-2">
                         <div class="text-4xl text-slate-600"><i class="fa-solid fa-car-tunnel"></i></div>
                         <h3 class="text-slate-300 font-bold text-base">Автомобили не найдены</h3>
-                        <p class="text-xs text-slate-500 max-w-sm mx-auto">В выбранной зоне или статусе за ${currentDate} записей нет.</p>
+                        <p class="text-xs text-slate-500 max-w-sm mx-auto">В выбранной зоне или вкладке за ${currentDate} записей нет.</p>
                         <div class="flex justify-center gap-2 pt-2">
                             ${(searchQuery || selectedCategory !== 'all' || selectedSector !== 'all') ? `
                                 <button onclick="resetFilters()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl text-xs font-semibold">
-                                    Сбросить фильтры
+                                    Показать все зоны
                                 </button>
                             ` : ''}
                             <button onclick="openAddVehicleModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold">
-                                + Добавить авто в эту зону
+                                + Добавить авто
                             </button>
                         </div>
                     </div>
@@ -1307,13 +1475,42 @@
 
         function getStatusPillHtml(status) {
             if (status === 'arrived') return '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">На площадке</span>';
-            if (status === 'transit') return '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">В пути</span>';
+            if (status === 'departed') return '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-700 text-slate-300 border border-slate-600">Убыл</span>';
             return '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">Ожидается</span>';
         }
 
         function buildZoneOptionsHtml(currentSector) {
             const allZones = getAllActiveZones();
             return allZones.map(z => `<option value="${escapeHtml(z)}" ${z === currentSector ? 'selected' : ''}>📍 ${escapeHtml(z)}</option>`).join('');
+        }
+
+        function renderTimeBadgesHtml(v) {
+            if (!v.arrivedAt && !v.departedAt) return '';
+            let badges = '<div class="flex items-center gap-2 flex-wrap mt-2.5 pt-2 border-t border-slate-700/40 text-[11px]">';
+            if (v.arrivedAt) {
+                badges += `<span class="bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-lg flex items-center gap-1"><i class="fa-solid fa-right-to-bracket"></i> Заезд: <b>${escapeHtml(v.arrivedAt)}</b></span>`;
+            }
+            if (v.departedAt) {
+                badges += `<span class="bg-slate-700/80 text-slate-300 border border-slate-600 px-2 py-0.5 rounded-lg flex items-center gap-1"><i class="fa-solid fa-right-from-bracket"></i> Выезд: <b>${escapeHtml(v.departedAt)}</b></span>`;
+            }
+            badges += '</div>';
+            return badges;
+        }
+
+        function getQuickActionBtnHtml(v) {
+            if (v.status === 'pending') {
+                return `<button onclick="handlePrimaryAction(${v.id})" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-1.5">
+                    <i class="fa-solid fa-right-to-bracket"></i> Заехал
+                </button>`;
+            }
+            if (v.status === 'arrived') {
+                return `<button onclick="handlePrimaryAction(${v.id})" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm bg-amber-600 hover:bg-amber-500 text-white flex items-center gap-1.5">
+                    <i class="fa-solid fa-right-from-bracket"></i> Выехал
+                </button>`;
+            }
+            return `<button onclick="handlePrimaryAction(${v.id})" class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-sm bg-slate-700 hover:bg-slate-600 text-slate-200">
+                Сбросить
+            </button>`;
         }
 
         function renderCards(items, container, showStatusPill) {
@@ -1324,7 +1521,7 @@
                 
                 let borderColor = 'border-slate-700';
                 if (v.status === 'arrived') borderColor = 'border-emerald-500/50 bg-slate-800/95';
-                if (v.status === 'transit') borderColor = 'border-blue-500/50 bg-slate-800/95';
+                if (v.status === 'departed') borderColor = 'border-slate-700/80 bg-slate-800/60 opacity-85';
 
                 const cleanPhone = v.phone.replace(/[^\d+]/g, '');
 
@@ -1355,17 +1552,15 @@
                                 <a href="tel:${escapeHtml(cleanPhone)}" class="text-slate-400 hover:text-slate-200 font-mono">${escapeHtml(v.phone)}</a>
                             </div>
                             ${v.note ? `<div class="mt-2 text-xs text-amber-400/90 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20 flex items-center gap-1.5"><i class="fa-solid fa-circle-info"></i> ${escapeHtml(v.note)}</div>` : ''}
-                            ${v.timestamp ? `<div class="text-[11px] text-slate-400 mt-2 px-1"><i class="fa-regular fa-clock mr-1"></i>Отметка: ${escapeHtml(v.timestamp)}</div>` : ''}
+                            ${renderTimeBadgesHtml(v)}
                         </div>
                         <div class="mt-4 pt-3 border-t border-slate-700/60 flex items-center justify-between gap-2">
                             <select onchange="setStatus(${v.id}, this.value)" class="bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
                                 <option value="pending" ${v.status === 'pending' ? 'selected' : ''}>⏳ Ожидается</option>
-                                <option value="transit" ${v.status === 'transit' ? 'selected' : ''}>🚙 В пути</option>
                                 <option value="arrived" ${v.status === 'arrived' ? 'selected' : ''}>✅ На площадке</option>
+                                <option value="departed" ${v.status === 'departed' ? 'selected' : ''}>🏁 Убыл</option>
                             </select>
-                            <button onclick="quickToggleArrived(${v.id})" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm ${v.status === 'arrived' ? 'bg-slate-700 hover:bg-slate-600 text-slate-200' : 'bg-emerald-600 hover:bg-emerald-500 text-white'}">
-                                ${v.status === 'arrived' ? 'Сбросить' : '✓ Прибыл'}
-                            </button>
+                            ${getQuickActionBtnHtml(v)}
                         </div>
                     </div>
                 `;
@@ -1386,7 +1581,7 @@
                                     <th class="py-3 px-4">Зона парковки</th>
                                     <th class="py-3 px-4">Марка / Телефон</th>
                                     <th class="py-3 px-4">Гос. номер</th>
-                                    <th class="py-3 px-4">Примечание</th>
+                                    <th class="py-3 px-4">Прибытие / Убытие</th>
                                     <th class="py-3 px-4 text-center">Статус</th>
                                     <th class="py-3 px-4 text-right">Действие</th>
                                 </tr>
@@ -1398,7 +1593,10 @@
                 html += `
                     <tr class="hover:bg-slate-700/40 transition-colors">
                         <td class="py-3 px-4 text-slate-500 font-mono text-xs">${index + 1}</td>
-                        <td class="py-3 px-4 font-medium">${escapeHtml(v.category)}</td>
+                        <td class="py-3 px-4 font-medium">
+                            <div>${escapeHtml(v.category)}</div>
+                            ${v.note ? `<div class="text-[11px] text-amber-400">${escapeHtml(v.note)}</div>` : ''}
+                        </td>
                         <td class="py-3 px-4">
                             <select onchange="setVehicleSector(${v.id}, this.value)" class="bg-slate-900 px-2 py-1 rounded-lg border border-slate-700 text-xs text-slate-200 focus:outline-none">
                                 ${buildZoneOptionsHtml(v.sector)}
@@ -1409,21 +1607,19 @@
                             <a href="tel:${escapeHtml(cleanPhone)}" class="text-indigo-400 font-mono hover:underline">${escapeHtml(v.phone)}</a>
                         </td>
                         <td class="py-3 px-4 font-mono font-bold tracking-wide whitespace-nowrap">${escapeHtml(v.plate)}</td>
-                        <td class="py-3 px-4 text-xs text-amber-400">
-                            ${escapeHtml(v.note)}
-                            ${v.timestamp ? `<div class="text-[10px] text-slate-400 mt-0.5"><i class="fa-regular fa-clock mr-1"></i>${escapeHtml(v.timestamp)}</div>` : ''}
+                        <td class="py-3 px-4 text-xs whitespace-nowrap">
+                            ${v.arrivedAt ? `<div class="text-emerald-400"><i class="fa-solid fa-right-to-bracket mr-1"></i>Заезд: <b>${escapeHtml(v.arrivedAt)}</b></div>` : '<span class="text-slate-500">—</span>'}
+                            ${v.departedAt ? `<div class="text-slate-300 mt-0.5"><i class="fa-solid fa-right-from-bracket mr-1"></i>Выезд: <b>${escapeHtml(v.departedAt)}</b></div>` : ''}
                         </td>
                         <td class="py-3 px-4 text-center">
                             <select onchange="setStatus(${v.id}, this.value)" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-200 focus:outline-none">
                                 <option value="pending" ${v.status === 'pending' ? 'selected' : ''}>⏳ Ожидается</option>
-                                <option value="transit" ${v.status === 'transit' ? 'selected' : ''}>🚙 В пути</option>
                                 <option value="arrived" ${v.status === 'arrived' ? 'selected' : ''}>✅ На площадке</option>
+                                <option value="departed" ${v.status === 'departed' ? 'selected' : ''}>🏁 Убыл</option>
                             </select>
                         </td>
                         <td class="py-3 px-4 text-right whitespace-nowrap">
-                            <button onclick="quickToggleArrived(${v.id})" class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-sm ${v.status === 'arrived' ? 'bg-slate-700 hover:bg-slate-600 text-slate-200' : 'bg-emerald-600 hover:bg-emerald-500 text-white'}">
-                                ${v.status === 'arrived' ? 'Сбросить' : '✓ Прибыл'}
-                            </button>
+                            ${getQuickActionBtnHtml(v)}
                         </td>
                     </tr>
                 `;
@@ -1438,34 +1634,46 @@
                 v.sector = newSector;
                 saveToStorage();
                 render();
-                showToast(`${v.plate} перемещен в зону «${newSector}»`);
+                showToast(`${v.plate} → зона «${newSector}»`);
             }
         }
 
         function setStatus(id, newStatus) {
             const v = vehicles.find(item => item.id === id);
             if (v) {
+                const nowStr = getNowTimeStr();
                 v.status = newStatus;
-                if (newStatus === 'arrived' || newStatus === 'transit') {
-                    v.timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                if (newStatus === 'arrived') {
+                    if (!v.arrivedAt) v.arrivedAt = nowStr;
+                    v.departedAt = null;
+                } else if (newStatus === 'departed') {
+                    if (!v.arrivedAt) v.arrivedAt = nowStr;
+                    v.departedAt = nowStr;
                 } else {
-                    v.timestamp = null;
+                    v.arrivedAt = null;
+                    v.departedAt = null;
                 }
                 saveToStorage();
                 render();
-                const label = newStatus === 'arrived' ? 'На площадке' : newStatus === 'transit' ? 'В пути' : 'Ожидается';
+                const label = newStatus === 'arrived'
+                    ? `На площадке (заезд ${v.arrivedAt})`
+                    : newStatus === 'departed'
+                        ? `Убыл (выезд ${v.departedAt})`
+                        : 'Ожидается';
                 showToast(`${v.plate} → ${label}`);
             }
         }
 
-        function quickToggleArrived(id) {
+        // Логика основной кнопки: Ожидается -> Заехал (фиксирует прибытие) -> Выехал (фиксирует убытие) -> Сброс
+        function handlePrimaryAction(id) {
             const v = vehicles.find(item => item.id === id);
-            if (v) {
-                if (v.status === 'arrived') {
-                    setStatus(id, 'pending');
-                } else {
-                    setStatus(id, 'arrived');
-                }
+            if (!v) return;
+            if (v.status === 'pending') {
+                setStatus(id, 'arrived');
+            } else if (v.status === 'arrived') {
+                setStatus(id, 'departed');
+            } else {
+                setStatus(id, 'pending');
             }
         }
 
