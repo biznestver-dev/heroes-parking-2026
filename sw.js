@@ -1,6 +1,5 @@
 const CACHE_NAME = 'parking-live-arena-v1';
 
-// Ссылки, которые сохраняются в память устройства сразу при первом заходе
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -9,17 +8,13 @@ const ASSETS_TO_CACHE = [
     'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap'
 ];
 
-// Установка Service Worker и кэширование основных ресурсов
 self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(ASSETS_TO_CACHE);
-        })
+        caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
     );
     self.skipWaiting();
 });
 
-// Очистка старого кэша при обновлении версии
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((keys) => {
@@ -31,9 +26,7 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// Перехват запросов: если нет интернета — отдаем всё из памяти телефона
 self.addEventListener('fetch', (event) => {
-    // Для API погоды: сначала пробуем сеть, если офлайн — берем последний сохраненный прогноз
     if (event.request.url.includes('open-meteo.com')) {
         event.respondWith(
             fetch(event.request)
@@ -47,8 +40,6 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Для самой страницы, стилей, шрифтов и иконок FontAwesome:
-    // мгновенно отдаем из кэша и параллельно обновляем в фоне при наличии сети
     event.respondWith(
         caches.match(event.request).then((cachedResponse) => {
             const fetchPromise = fetch(event.request)
