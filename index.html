@@ -6,7 +6,7 @@
     <title>Парковка • Лайв Арена • Система контроля</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -18,6 +18,11 @@
             50% { opacity: 0.5; transform: scale(1.15); }
         }
         .mic-active { color: #f43f5e !important; animation: pulse-mic 1.2s infinite; }
+        @keyframes pop-in {
+            0% { opacity: 0; transform: scale(0.96); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .animate-pop { animation: pop-in 0.15s ease-out forwards; }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
@@ -169,20 +174,25 @@
         <!-- Controls Bar: Search, Filters, Actions -->
         <div class="bg-slate-800 border border-slate-700 rounded-2xl p-3 sm:p-4 shadow-lg flex flex-col lg:flex-row gap-3 items-center justify-between">
             
-            <!-- Search Input with Voice & Clear -->
-            <div class="relative w-full lg:w-72">
-                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </span>
-                <input type="text" id="searchInput" placeholder="Поиск (номер, марка, гость, зона)..." 
-                    class="w-full pl-9 pr-16 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all">
-                <div class="absolute inset-y-0 right-0 pr-2 flex items-center gap-1">
-                    <button id="clearSearch" title="Очистить поиск" class="p-1.5 text-slate-400 hover:text-slate-200 hidden">
-                        <i class="fa-solid fa-circle-xmark"></i>
-                    </button>
-                    <button id="voiceSearchBtn" onclick="startVoiceSearch()" title="Голосовой поиск номера" class="p-1.5 text-slate-400 hover:text-indigo-400 transition-colors">
-                        <i class="fa-solid fa-microphone"></i>
-                    </button>
+            <!-- Search Input with Instant Fullscreen Radar Trigger -->
+            <div class="relative w-full lg:w-80 flex items-center gap-1.5">
+                <div class="relative flex-1">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" id="searchInput" placeholder="Цифры номера (напр. 331) или гость..." 
+                        class="w-full pl-9 pr-20 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all font-medium">
+                    <div class="absolute inset-y-0 right-0 pr-2 flex items-center gap-1">
+                        <button id="clearSearch" title="Очистить поиск" class="p-1.5 text-slate-400 hover:text-slate-200 hidden">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                        </button>
+                        <button id="openFullscreenMatchBtn" onclick="openFullscreenMatchOverlay()" title="Развернуть найденные на весь экран" class="p-1.5 text-indigo-400 hover:text-indigo-300 hidden">
+                            <i class="fa-solid fa-expand"></i>
+                        </button>
+                        <button id="voiceSearchBtn" onclick="startVoiceSearch()" title="Голосовой поиск номера" class="p-1.5 text-slate-400 hover:text-indigo-400 transition-colors">
+                            <i class="fa-solid fa-microphone"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -243,7 +253,10 @@
         <!-- Global Search Notice Banner -->
         <div id="globalSearchBanner" class="hidden bg-indigo-950/60 border border-indigo-500/30 rounded-xl px-4 py-2 text-xs text-indigo-300 flex items-center justify-between">
             <span><i class="fa-solid fa-magnifying-glass mr-1.5"></i> Показаны результаты поиска <b>по всем вкладкам</b> (Ожидаются, На площадке, Убыли)</span>
-            <button onclick="resetFilters()" class="text-indigo-400 hover:text-white underline font-semibold ml-2">Сбросить</button>
+            <div class="flex items-center gap-3">
+                <button onclick="openFullscreenMatchOverlay()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-2.5 py-1 rounded-lg font-semibold">На весь экран</button>
+                <button onclick="resetFilters()" class="text-indigo-400 hover:text-white underline font-semibold">Сбросить</button>
+            </div>
         </div>
 
         <!-- Tabs Navigation (Pending / Arrived / Departed) -->
@@ -268,6 +281,47 @@
         </div>
 
     </main>
+
+    <!-- ========================================================================= -->
+    <!-- FULLSCREEN MATCH OVERLAY (Полноэкранное окно совпадения для КПП)          -->
+    <!-- ========================================================================= -->
+    <div id="fullscreenMatchOverlay" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex flex-col p-4 sm:p-6 hidden overflow-y-auto">
+        <div class="max-w-3xl w-full mx-auto flex-1 flex flex-col justify-between gap-4">
+            
+            <!-- Top Bar inside Fullscreen Overlay: Live Search Input & Close -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-900 border border-slate-700/80 p-3 sm:p-4 rounded-2xl shadow-xl">
+                <div class="flex items-center gap-2.5 flex-1">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center text-lg shrink-0">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <div class="flex-1 relative">
+                        <label class="text-[10px] uppercase tracking-wider text-indigo-400 font-bold block">Быстрый поиск и отметка КПП</label>
+                        <input type="text" id="overlaySearchInput" placeholder="Цифры или номер..." 
+                            class="w-full bg-transparent text-lg sm:text-xl font-extrabold text-white font-mono uppercase focus:outline-none">
+                    </div>
+                </div>
+                <div class="flex items-center justify-between sm:justify-end gap-2 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-800">
+                    <span id="overlayMatchCountBadge" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                        Найдено: 1
+                    </span>
+                    <button onclick="closeFullscreenMatchOverlay(false)" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-1.5">
+                        <i class="fa-solid fa-list"></i> К списку
+                    </button>
+                    <button onclick="closeFullscreenMatchOverlay(true)" title="Очистить и закрыть" class="w-10 h-10 bg-rose-900/40 hover:bg-rose-800/60 border border-rose-700/50 text-rose-300 rounded-xl flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dynamic Content: Single Giant Card OR Multiple Selection Cards -->
+            <div id="overlayMatchCardsContainer" class="my-auto py-2"></div>
+
+            <!-- Bottom Hint -->
+            <div class="text-center text-xs text-slate-500 pb-1">
+                Нажмите <b class="text-emerald-400">«Заехал»</b> для мгновенной фиксации времени прибытия и возврата к дежурству
+            </div>
+        </div>
+    </div>
 
     <!-- Import from Table (Excel / Google Sheets / CSV) Modal -->
     <div id="importModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
@@ -472,16 +526,11 @@
                 <div class="w-16 h-16 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-2xl">
                     <i class="fa-solid fa-car-rear"></i>
                 </div>
-                <p class="text-xs text-slate-300">Сфотографируйте номер автомобиля или выберите снимок для быстрой отметки заезда/выезда</p>
+                <p class="text-xs text-slate-300">Сфотографируйте номер автомобиля или введите цифры ниже для мгновенного вывода на весь экран</p>
                 <input type="file" id="plateCameraInput" accept="image/*" capture="environment" class="hidden" onchange="handleScannedPhoto(event)">
                 <button onclick="document.getElementById('plateCameraInput').click()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold">
                     <i class="fa-solid fa-camera-retro mr-1.5"></i> Сделать фото / Загрузить
                 </button>
-            </div>
-            <div id="scanResultBox" class="hidden text-left bg-slate-900 p-3 rounded-xl border border-slate-700 text-xs space-y-2">
-                <span class="text-slate-400 block font-medium">Результат распознавания:</span>
-                <div id="scanResultText" class="font-bold text-emerald-400 font-mono text-sm"></div>
-                <div id="scanActionButtons" class="flex gap-2 pt-2"></div>
             </div>
             <div class="flex justify-end pt-2">
                 <button onclick="closeScannerModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl text-xs font-semibold">Закрыть</button>
@@ -572,6 +621,7 @@
         let selectedSector = 'all';
         let activeStaffFilterId = 'all';
         let currentDate = getTodayLocalDate();
+        let isOverlayManuallyDismissed = false;
 
         let currentWeatherSummary = {
             tempText: '',
@@ -714,6 +764,14 @@
             return str.toString().toLowerCase()
                 .replace(/[\s\-()]/g, '')
                 .replace(/[abekmhopctyx]/g, ch => latToCyr[ch] || ch);
+        }
+
+        // Извлекает основную цифровую часть госномера (первая группа цифр, напр. "331" из "Н 331 АН 997")
+        function extractPlateMainDigits(plateStr) {
+            if (!plateStr) return '';
+            const m = plateStr.match(/\d{3}/);
+            if (m) return m[0];
+            return plateStr.replace(/\D/g, '');
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -1289,18 +1347,32 @@
 
         function setupEventListeners() {
             const searchInput = document.getElementById('searchInput');
+            const overlayInput = document.getElementById('overlaySearchInput');
             const clearSearchBtn = document.getElementById('clearSearch');
             
             searchInput.addEventListener('input', (e) => {
                 searchQuery = e.target.value.trim();
+                overlayInput.value = searchQuery;
+                isOverlayManuallyDismissed = false;
                 clearSearchBtn.classList.toggle('hidden', searchQuery === '');
                 render();
+                checkAndTriggerFullscreenOverlay();
+            });
+
+            overlayInput.addEventListener('input', (e) => {
+                searchQuery = e.target.value.trim();
+                searchInput.value = searchQuery;
+                clearSearchBtn.classList.toggle('hidden', searchQuery === '');
+                render();
+                renderFullscreenOverlayContent();
             });
 
             clearSearchBtn.addEventListener('click', () => {
                 searchInput.value = '';
+                overlayInput.value = '';
                 searchQuery = '';
                 clearSearchBtn.classList.add('hidden');
+                closeFullscreenMatchOverlay(false);
                 render();
             });
 
@@ -1373,16 +1445,273 @@
             });
         }
 
+        // =========================================================================
+        // ЛОГИКА ПОЛНОЭКРАННОГО ОКНА СОВПАДЕНИЯ (КПП-РАДАР)
+        // =========================================================================
+        function getMatchingVehiclesForOverlay(q) {
+            if (!q) return [];
+            const qNorm = normalizeSearch(q);
+            const qDigitsOnly = q.replace(/\D/g, '');
+
+            // Приоритет 1: Если введены ровно 3 цифры (например "331"), ищем сначала машины с этими цифрами госномера
+            if (/^\d{3}$/.test(q.trim())) {
+                const exactThreeDigitMatches = vehicles.filter(v => {
+                    const mainDigits = extractPlateMainDigits(v.plate);
+                    return mainDigits === q.trim() || normalizeSearch(v.plate).includes(q.trim());
+                });
+                if (exactThreeDigitMatches.length > 0) return exactThreeDigitMatches;
+            }
+
+            // Приоритет 2: Общий умный поиск по номеру, марке, гостю
+            return vehicles.filter(v => matchesVehicleQuery(v, q));
+        }
+
+        function checkAndTriggerFullscreenOverlay() {
+            const q = searchQuery.trim();
+            const qNorm = normalizeSearch(q);
+            const expandBtn = document.getElementById('openFullscreenMatchBtn');
+
+            const matches = getMatchingVehiclesForOverlay(q);
+            expandBtn.classList.toggle('hidden', matches.length === 0);
+
+            if (isOverlayManuallyDismissed) return;
+
+            // Автоматически открываем полноэкранное окно, если:
+            // 1) Введены минимум 3 цифры (например "331") И есть совпадения в базе
+            // 2) Либо введено от 3 символов (например "845", "аурус", "шаман") и найдено от 1 до 6 машин
+            const isThreeDigits = /^\d{3,}$/.test(qNorm);
+            const isSpecificEnough = qNorm.length >= 3 && matches.length >= 1 && matches.length <= 6;
+
+            if ((isThreeDigits && matches.length >= 1) || isSpecificEnough) {
+                openFullscreenMatchOverlay();
+            } else if (matches.length === 0) {
+                document.getElementById('fullscreenMatchOverlay').classList.add('hidden');
+            }
+        }
+
+        function openFullscreenMatchOverlay() {
+            const matches = getMatchingVehiclesForOverlay(searchQuery);
+            if (matches.length === 0) return;
+
+            const overlay = document.getElementById('fullscreenMatchOverlay');
+            const overlayInput = document.getElementById('overlaySearchInput');
+            overlayInput.value = searchQuery;
+            overlay.classList.remove('hidden');
+            renderFullscreenOverlayContent();
+        }
+
+        function closeFullscreenMatchOverlay(clearQuery = false) {
+            const overlay = document.getElementById('fullscreenMatchOverlay');
+            overlay.classList.add('hidden');
+            isOverlayManuallyDismissed = true;
+
+            if (clearQuery) {
+                searchQuery = '';
+                document.getElementById('searchInput').value = '';
+                document.getElementById('overlaySearchInput').value = '';
+                document.getElementById('clearSearch').classList.add('hidden');
+                document.getElementById('openFullscreenMatchBtn').classList.add('hidden');
+                render();
+            }
+        }
+
+        function handleOverlayAction(id, targetStatus) {
+            setStatus(id, targetStatus);
+            // После нажатия "Заехал" / "Выехал" закрываем полноэкранное окно и очищаем поиск для следующей машины
+            closeFullscreenMatchOverlay(true);
+        }
+
+        function renderFullscreenOverlayContent() {
+            const container = document.getElementById('overlayMatchCardsContainer');
+            const badge = document.getElementById('overlayMatchCountBadge');
+            const matches = getMatchingVehiclesForOverlay(searchQuery);
+
+            badge.textContent = `Найдено: ${matches.length}`;
+
+            if (matches.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 text-center space-y-3">
+                        <div class="text-4xl text-slate-600"><i class="fa-solid fa-car-Burst"></i></div>
+                        <div class="text-lg font-bold text-slate-300">Совпадений в базе не найдено</div>
+                        <div class="pt-2">
+                            <button onclick="closeFullscreenMatchOverlay(false); openAddVehicleModal();" class="px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-sm font-bold">
+                                + Добавить этот номер в базу
+                            </button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Если найдена ровно 1 машина — выводим ОГРОМНУЮ карточку на весь экран
+            if (matches.length === 1) {
+                const v = matches[0];
+                const cleanPhone = v.phone.replace(/[^\d+]/g, '');
+                const isVip = v.sector === 'VIP' || v.note.toUpperCase().includes('VIP') || v.category.toUpperCase().includes('VIP');
+
+                let actionButtonsHtml = '';
+                if (v.status === 'pending') {
+                    actionButtonsHtml = `
+                        <button onclick="handleOverlayAction(${v.id}, 'arrived')" class="w-full py-5 sm:py-6 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white rounded-2xl text-xl sm:text-2xl font-extrabold shadow-xl shadow-emerald-950/60 flex items-center justify-center gap-3 transition-all">
+                            <i class="fa-solid fa-right-to-bracket text-2xl"></i> ЗАЕХАЛ (НА ПЛОЩАДКЕ)
+                        </button>
+                    `;
+                } else if (v.status === 'arrived') {
+                    actionButtonsHtml = `
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <button onclick="handleOverlayAction(${v.id}, 'departed')" class="sm:col-span-2 py-5 bg-amber-600 hover:bg-amber-500 text-white rounded-2xl text-xl font-extrabold shadow-xl flex items-center justify-center gap-3 transition-all">
+                                <i class="fa-solid fa-right-from-bracket"></i> ВЫЕХАЛ (УБЫЛ)
+                            </button>
+                            <button onclick="handleOverlayAction(${v.id}, 'pending')" class="py-5 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 rounded-2xl text-base font-bold transition-all">
+                                Сбросить статус
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    actionButtonsHtml = `
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <button onclick="handleOverlayAction(${v.id}, 'arrived')" class="py-5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-lg font-extrabold flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-rotate-left"></i> Вернуть «На площадку»
+                            </button>
+                            <button onclick="handleOverlayAction(${v.id}, 'pending')" class="py-5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-2xl text-lg font-bold">
+                                В «Ожидаются»
+                            </button>
+                        </div>
+                    `;
+                }
+
+                container.innerHTML = `
+                    <div class="animate-pop bg-slate-900 border-2 ${isVip ? 'border-amber-500/70' : 'border-indigo-500/60'} rounded-3xl p-5 sm:p-8 shadow-2xl space-y-6">
+                        
+                        <!-- Top Badges: Category + Giant Zone Pill -->
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <div class="flex items-center gap-2.5">
+                                <span class="px-4 py-1.5 rounded-xl text-sm sm:text-base font-extrabold uppercase tracking-wider ${isVip ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40'}">
+                                    ${escapeHtml(v.category)}
+                                </span>
+                                ${getStatusPillHtml(v.status)}
+                            </div>
+                            <div class="flex items-center gap-2 bg-slate-950 border border-slate-700 px-4 py-2 rounded-2xl">
+                                <span class="text-xs text-slate-400 uppercase font-bold">Зона:</span>
+                                <span class="text-base sm:text-lg font-extrabold text-emerald-400">📍 ${escapeHtml(v.sector)}</span>
+                            </div>
+                        </div>
+
+                        <!-- Giant License Plate -->
+                        <div class="bg-slate-950 border-2 border-slate-700 rounded-3xl py-6 px-4 text-center shadow-inner">
+                            <div class="text-3xl sm:text-5xl font-extrabold font-mono tracking-widest text-white select-all">
+                                ${escapeHtml(v.plate)}
+                            </div>
+                            <div class="text-sm sm:text-base text-slate-400 mt-2 font-medium flex items-center justify-center gap-3">
+                                <span><i class="fa-solid fa-car mr-1.5 text-indigo-400"></i>${escapeHtml(v.brand)}</span>
+                                ${v.note ? `<span>&bull;</span><span class="text-amber-400 font-semibold">${escapeHtml(v.note)}</span>` : ''}
+                            </div>
+                        </div>
+
+                        <!-- Driver Phone & Timestamps -->
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-800/70 border border-slate-700/80 px-4 py-3 rounded-2xl text-sm">
+                            <div class="flex items-center gap-3">
+                                <span class="text-slate-400">Водитель:</span>
+                                <a href="tel:${escapeHtml(cleanPhone)}" class="font-mono font-bold text-slate-100 hover:text-emerald-400 text-base flex items-center gap-2">
+                                    <i class="fa-solid fa-phone text-emerald-400"></i> ${escapeHtml(v.phone)}
+                                </a>
+                            </div>
+                            <div class="flex items-center gap-3 text-xs">
+                                ${v.arrivedAt ? `<span class="text-emerald-400">Заезд: <b>${escapeHtml(v.arrivedAt)}</b></span>` : ''}
+                                ${v.departedAt ? `<span class="text-slate-300">Выезд: <b>${escapeHtml(v.departedAt)}</b></span>` : ''}
+                            </div>
+                        </div>
+
+                        <!-- Primary Giant Action Button -->
+                        <div>
+                            ${actionButtonsHtml}
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Если найдено НЕСКОЛЬКО машин с одинаковыми цифрами — выводим список крупных карточек для выбора нужной
+            let listHtml = `
+                <div class="space-y-3">
+                    <div class="text-xs sm:text-sm font-semibold text-amber-300 bg-amber-500/10 border border-amber-500/30 px-4 py-2.5 rounded-xl flex items-center gap-2">
+                        <i class="fa-solid fa-layer-group"></i>
+                        <span>Найдено несколько машин (${matches.length} шт.) — выберите нужный автомобиль:</span>
+                    </div>
+                    <div class="grid grid-cols-1 gap-3.5 max-h-[65vh] overflow-y-auto pr-1">
+            `;
+
+            matches.forEach(v => {
+                const isVip = v.sector === 'VIP' || v.note.toUpperCase().includes('VIP') || v.category.toUpperCase().includes('VIP');
+                const cleanPhone = v.phone.replace(/[^\d+]/g, '');
+
+                let btnHtml = '';
+                if (v.status === 'pending') {
+                    btnHtml = `
+                        <button onclick="handleOverlayAction(${v.id}, 'arrived')" class="px-6 py-4 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white rounded-2xl text-base sm:text-lg font-extrabold shadow-lg flex items-center justify-center gap-2 shrink-0 transition-all">
+                            <i class="fa-solid fa-right-to-bracket"></i> ЗАЕХАЛ
+                        </button>
+                    `;
+                } else if (v.status === 'arrived') {
+                    btnHtml = `
+                        <button onclick="handleOverlayAction(${v.id}, 'departed')" class="px-6 py-4 bg-amber-600 hover:bg-amber-500 active:scale-95 text-white rounded-2xl text-base sm:text-lg font-extrabold shadow-lg flex items-center justify-center gap-2 shrink-0 transition-all">
+                            <i class="fa-solid fa-right-from-bracket"></i> ВЫЕХАЛ
+                        </button>
+                    `;
+                } else {
+                    btnHtml = `
+                        <button onclick="handleOverlayAction(${v.id}, 'arrived')" class="px-5 py-3.5 bg-slate-700 hover:bg-slate-600 text-slate-100 rounded-2xl text-sm font-bold shrink-0">
+                            Вернуть «Тут»
+                        </button>
+                    `;
+                }
+
+                listHtml += `
+                    <div class="animate-pop bg-slate-900 border-2 ${isVip ? 'border-amber-500/50' : 'border-slate-700'} hover:border-indigo-500 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 shadow-xl transition-all">
+                        <div class="space-y-1.5">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="text-xs font-bold px-2.5 py-1 rounded-lg ${isVip ? 'bg-amber-500/20 text-amber-300' : 'bg-indigo-500/20 text-indigo-300'} uppercase">
+                                    ${escapeHtml(v.category)}
+                                </span>
+                                <span class="text-xs font-extrabold px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-700 text-emerald-400">
+                                    📍 ${escapeHtml(v.sector)}
+                                </span>
+                                ${getStatusPillHtml(v.status)}
+                            </div>
+                            <div class="text-2xl sm:text-3xl font-extrabold font-mono tracking-wider text-white pt-1">
+                                ${escapeHtml(v.plate)}
+                            </div>
+                            <div class="text-xs sm:text-sm text-slate-400 flex items-center gap-3 flex-wrap">
+                                <span class="text-slate-200 font-semibold"><i class="fa-solid fa-car mr-1 text-slate-400"></i>${escapeHtml(v.brand)}</span>
+                                <a href="tel:${escapeHtml(cleanPhone)}" class="font-mono text-indigo-400 hover:underline"><i class="fa-solid fa-phone mr-1"></i>${escapeHtml(v.phone)}</a>
+                                ${v.note ? `<span class="text-amber-400 font-medium">• ${escapeHtml(v.note)}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            ${btnHtml}
+                        </div>
+                    </div>
+                `;
+            });
+
+            listHtml += `</div></div>`;
+            container.innerHTML = listHtml;
+        }
+
         function resetFilters() {
             searchQuery = '';
             selectedCategory = 'all';
             selectedSector = 'all';
             activeStaffFilterId = 'all';
+            isOverlayManuallyDismissed = false;
             document.getElementById('searchInput').value = '';
+            document.getElementById('overlaySearchInput').value = '';
             document.getElementById('clearSearch').classList.add('hidden');
+            document.getElementById('openFullscreenMatchBtn').classList.add('hidden');
             document.getElementById('categoryFilter').value = 'all';
             document.getElementById('sectorFilter').value = 'all';
             document.getElementById('staffZoneBanner').classList.add('hidden');
+            document.getElementById('fullscreenMatchOverlay').classList.add('hidden');
             renderStaffSection();
             render();
         }
@@ -1420,8 +1749,10 @@
                 const searchInput = document.getElementById('searchInput');
                 searchInput.value = transcript;
                 searchQuery = transcript.trim();
+                isOverlayManuallyDismissed = false;
                 document.getElementById('clearSearch').classList.toggle('hidden', searchQuery === '');
                 render();
+                checkAndTriggerFullscreenOverlay();
                 showToast(`Распознано: «${transcript}»`);
             };
 
@@ -1442,6 +1773,9 @@
             populateSectorSelectors();
             if (selectedSector !== 'all') {
                 document.getElementById('newSector').value = selectedSector;
+            }
+            if (searchQuery) {
+                document.getElementById('newPlate').value = searchQuery.toUpperCase();
             }
             document.getElementById('addVehicleModal').classList.remove('hidden');
             setTimeout(() => document.getElementById('newPlate').focus(), 100);
@@ -1489,7 +1823,6 @@
         }
 
         function openScannerModal() {
-            document.getElementById('scanResultBox').classList.add('hidden');
             document.getElementById('scannerModal').classList.remove('hidden');
         }
 
@@ -1507,22 +1840,15 @@
                 return;
             }
             const randomVehicle = targetList[Math.floor(Math.random() * targetList.length)];
+            const digits = extractPlateMainDigits(randomVehicle.plate) || randomVehicle.plate;
 
-            const resultBox = document.getElementById('scanResultBox');
-            const resultText = document.getElementById('scanResultText');
-            const actionsBox = document.getElementById('scanActionButtons');
-
-            resultText.textContent = `${randomVehicle.plate} (${randomVehicle.category} — ${randomVehicle.brand}, Зона: ${randomVehicle.sector})`;
-            actionsBox.innerHTML = `
-                <button onclick="setStatus(${randomVehicle.id}, 'arrived'); closeScannerModal();" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold text-xs">
-                    ✅ Заехал (Прибыл)
-                </button>
-                <button onclick="setStatus(${randomVehicle.id}, 'departed'); closeScannerModal();" class="flex-1 py-2 bg-slate-600 hover:bg-slate-500 text-white rounded-lg font-semibold text-xs">
-                    🏁 Выехал (Убыл)
-                </button>
-            `;
-            resultBox.classList.remove('hidden');
-            showToast(`Распознан номер: ${randomVehicle.plate}`);
+            closeScannerModal();
+            searchQuery = digits;
+            isOverlayManuallyDismissed = false;
+            document.getElementById('searchInput').value = searchQuery;
+            document.getElementById('clearSearch').classList.remove('hidden');
+            render();
+            openFullscreenMatchOverlay();
             event.target.value = '';
         }
 
@@ -2023,5 +2349,3 @@
     </script>
 </body>
 </html>
-
-```
