@@ -1,3 +1,27 @@
+Вот полностью обновлённый код `index.html`.
+
+### Что изменено и добавлено:
+
+1. **Умный поиск по номерам (`normalizeSearch`):** Теперь не важно, есть ли пробелы и на какой раскладке (русской или английской) введён номер. Ввод `н331ан`, `H 331 AH` или просто `331` одинаково точно найдёт машину.
+2. **Глобальный поиск по всем вкладкам:** Как только начинаешь вводить текст в поиск или выбираешь фильтр, поиск идёт **сразу по всем статусам** (с отображением плашки текущего статуса на карточке), чтобы не приходилось вручную прокликивать вкладки «Ожидаются» / «В пути» / «На площадке». Бейджи на вкладках тоже динамически пересчитываются под текущий фильтр.
+
+
+3. **Голосовой ввод в поиске:** В строку поиска добавлена иконка микрофона (`Web Speech API`). На улице можно нажать на микрофон, сказать *«триста тридцать один»* или *«Мерседес»*, и список сразу отфильтруется.
+4. **Добавление авто «на лету» (кнопка «+ Авто»):** Появилось модальное окно для быстрого добавления машины вне списка прямо с телефона (с возможностью сразу отметить её как «На площадке»).
+5. **Исправлена логика кнопок статуса:** Зелёная кнопка «Прибыл» теперь сразу переводит машину в статус `arrived` (На площадке), а не перекидывает в промежуточный «В пути».
+
+
+6. **Сохранение базового шаблона при загрузке файла:** Если загрузить CSV/JSON, он сохраняется в `localStorage` как новый базовый список (`heroes_custom_base_list`) и не слетает при перезагрузке страницы или переключении дат.
+7. **Автоматическая текущая дата:** При открытии ставится сегодняшняя дата по локальному времени устройства.
+8. **Замена системного `confirm()`:** В сканере номера стандартное браузерное окно заменено на встроенное кастомное модальное окно в стиле дашборда.
+
+
+
+---
+
+### Полный код (`index.html`)
+
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -10,9 +34,14 @@
     <style>
         body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        @keyframes pulse-mic {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.15); }
+        }
+        .mic-active { color: #f43f5e !important; animation: pulse-mic 1.2s infinite; }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
@@ -22,7 +51,7 @@
         <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex flex-col lg:flex-row justify-between items-center gap-3">
             
             <!-- Title & Venue & Date Selector -->
-            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full lg:w-auto">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full lg:w-auto justify-between sm:justify-start">
                 <div>
                     <div class="flex items-center gap-2 flex-wrap">
                         <span class="bg-indigo-600 text-white text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Герои Спорта 2026</span>
@@ -32,14 +61,14 @@
                 </div>
 
                 <!-- Date & Archive Picker -->
-                <div class="flex items-center gap-2 bg-slate-900/90 border border-slate-700 px-3 py-1.5 rounded-xl">
+                <div class="flex items-center gap-2 bg-slate-900/90 border border-slate-700 px-3 py-1.5 rounded-xl self-start sm:self-center">
                     <i class="fa-regular fa-calendar text-indigo-400 text-sm"></i>
                     <input type="date" id="currentDateInput" class="bg-transparent text-xs sm:text-sm text-slate-200 font-semibold focus:outline-none cursor-pointer">
                 </div>
             </div>
 
             <!-- Weather Widget & Stats -->
-            <div class="flex items-center gap-3 flex-wrap justify-end w-full lg:w-auto">
+            <div class="flex items-center gap-3 flex-wrap justify-between sm:justify-end w-full lg:w-auto">
                 <!-- Weather info -->
                 <div class="hidden sm:flex items-center gap-2 bg-slate-900/80 border border-slate-700 px-3 py-1.5 rounded-xl text-xs text-slate-300">
                     <i class="fa-solid fa-cloud-sun text-amber-400 text-base"></i>
@@ -50,7 +79,7 @@
                 </div>
 
                 <!-- Quick stats -->
-                <div class="flex items-center gap-1.5 bg-slate-900/80 border border-slate-700 px-3 py-1.5 rounded-xl text-xs sm:text-sm">
+                <div class="flex items-center gap-1.5 bg-slate-900/80 border border-slate-700 px-3 py-1.5 rounded-xl text-xs sm:text-sm flex-1 sm:flex-initial justify-around">
                     <div class="text-center px-1.5">
                         <span id="statTotal" class="block font-bold text-slate-200">0</span>
                         <span class="text-slate-400 text-[10px] uppercase">Всего</span>
@@ -79,13 +108,13 @@
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-4 sm:px-6 lg:px-8 flex flex-col gap-4">
 
         <!-- Contacts & Management Panel Bar -->
-        <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-3 sm:p-4 shadow-md flex flex-col md:flex-row justify-between items-center gap-3 text-xs">
+        <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-3 sm:p-4 shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-3 text-xs">
             <div class="flex items-center gap-2 flex-wrap">
                 <span class="font-semibold text-indigo-400"><i class="fa-solid fa-headset mr-1"></i> Ответственные смены:</span>
                 <span class="bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-700 text-slate-300">Тех. менеджер: <b>Олег Зломанов</b></span>
                 <span class="bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-700 text-slate-300">Диспетчер КПП: <b>Пост 1</b></span>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 w-full md:w-auto justify-end">
                 <button onclick="openTelegramExportModal()" class="px-3 py-1.5 bg-blue-600/30 hover:bg-blue-600/50 border border-blue-500/40 text-blue-300 rounded-xl font-medium transition-colors flex items-center gap-1.5">
                     <i class="fa-brands fa-telegram"></i> Отчет для Telegram
                 </button>
@@ -95,33 +124,38 @@
             </div>
         </div>
 
-        <!-- Controls Bar: Search, Filters, Scanner, View Switch -->
+        <!-- Controls Bar: Search, Filters, Actions -->
         <div class="bg-slate-800 border border-slate-700 rounded-2xl p-3 sm:p-4 shadow-lg flex flex-col lg:flex-row gap-3 items-center justify-between">
             
-            <!-- Search Input -->
-            <div class="relative w-full lg:w-64">
+            <!-- Search Input with Voice & Clear -->
+            <div class="relative w-full lg:w-72">
                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                     <i class="fa-solid fa-magnifying-glass"></i>
                 </span>
-                <input type="text" id="searchInput" placeholder="Поиск (номер, марка, гость)..." 
-                    class="w-full pl-10 pr-10 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all">
-                <button id="clearSearch" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-200 hidden">
-                    <i class="fa-solid fa-circle-xmark"></i>
-                </button>
+                <input type="text" id="searchInput" placeholder="Поиск (331, н331ан, марка, гость)..." 
+                    class="w-full pl-9 pr-16 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all">
+                <div class="absolute inset-y-0 right-0 pr-2 flex items-center gap-1">
+                    <button id="clearSearch" title="Очистить поиск" class="p-1.5 text-slate-400 hover:text-slate-200 hidden">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                    </button>
+                    <button id="voiceSearchBtn" onclick="startVoiceSearch()" title="Голосовой поиск номера" class="p-1.5 text-slate-400 hover:text-indigo-400 transition-colors">
+                        <i class="fa-solid fa-microphone"></i>
+                    </button>
+                </div>
             </div>
 
             <!-- Filters: Category & Sector -->
             <div class="w-full lg:w-auto flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 flex-wrap">
                 <div class="flex items-center gap-1.5">
                     <span class="text-xs text-slate-400 font-medium whitespace-nowrap"><i class="fa-solid fa-filter mr-1"></i>Категория:</span>
-                    <select id="categoryFilter" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                    <select id="categoryFilter" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
                         <option value="all">Все категории</option>
                     </select>
                 </div>
 
                 <div class="flex items-center gap-1.5">
                     <span class="text-xs text-slate-400 font-medium whitespace-nowrap"><i class="fa-solid fa-map-pin mr-1"></i>Зона:</span>
-                    <select id="sectorFilter" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                    <select id="sectorFilter" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
                         <option value="all">Все зоны</option>
                         <option value="Зона А">Зона А (VIP / Подъезд)</option>
                         <option value="Зона Б">Зона Б (Артисты)</option>
@@ -131,27 +165,38 @@
                 </div>
             </div>
 
-            <!-- Action buttons: Scanner, Upload, View switch & Reset -->
+            <!-- Action buttons: Add, Scanner, Upload, View switch & Reset -->
             <div class="flex items-center gap-2 w-full lg:w-auto justify-end flex-wrap">
+                <!-- Add Vehicle manually -->
+                <button onclick="openAddVehicleModal()" title="Добавить автомобиль вне списка" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs sm:text-sm font-semibold transition-colors flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-plus"></i> Авто
+                </button>
+
                 <!-- OCR / Photo Scanner trigger -->
                 <button onclick="openScannerModal()" title="Сканировать / Снять номер" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5 shadow-sm">
-                    <i class="fa-solid fa-camera"></i> Скан номера
+                    <i class="fa-solid fa-camera"></i> Скан
                 </button>
 
                 <!-- Hidden file input for CSV/JSON upload -->
                 <input type="file" id="fileUploadInput" accept=".csv, .json, .txt" class="hidden" onchange="handleFileUpload(event)">
-                <button onclick="document.getElementById('fileUploadInput').click()" title="Загрузить список" class="px-3.5 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5">
+                <button onclick="document.getElementById('fileUploadInput').click()" title="Загрузить список (CSV / JSON)" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5">
                     <i class="fa-solid fa-file-arrow-up"></i>
                 </button>
 
-                <button id="toggleViewBtn" class="px-3.5 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5">
-                    <i class="fa-solid fa-table-cells"></i> <span id="viewBtnText">Таблица</span>
+                <button id="toggleViewBtn" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5">
+                    <i class="fa-solid fa-table-cells"></i> <span id="viewBtnText" class="hidden sm:inline">Таблица</span>
                 </button>
 
                 <button id="resetStorageBtn" title="Сбросить отметки на эту дату" class="px-3 py-2 bg-rose-900/40 hover:bg-rose-900/70 border border-rose-800 text-rose-300 rounded-xl text-xs sm:text-sm font-medium transition-colors">
                     <i class="fa-solid fa-rotate-right"></i>
                 </button>
             </div>
+        </div>
+
+        <!-- Global Search Notice Banner (shown when searching across all tabs) -->
+        <div id="globalSearchBanner" class="hidden bg-indigo-950/60 border border-indigo-500/30 rounded-xl px-4 py-2 text-xs text-indigo-300 flex items-center justify-between">
+            <span><i class="fa-solid fa-magnifying-glass mr-1.5"></i> Показаны результаты поиска <b>по всем вкладкам</b> (Ожидаются, В пути, На площадке)</span>
+            <button onclick="resetFilters()" class="text-indigo-400 hover:text-white underline font-semibold ml-2">Сбросить</button>
         </div>
 
         <!-- Tabs Navigation (3 Status States) -->
@@ -161,7 +206,7 @@
                 <span id="badgePending" class="bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full text-xs font-bold">0</span>
             </button>
             <button id="tabTransitBtn" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition-colors whitespace-nowrap">
-                <i class="fa-solid fa-car-burst text-blue-400"></i> В пути / Задерживаются 
+                <i class="fa-solid fa-car-side text-blue-400"></i> В пути / Задерживаются 
                 <span id="badgeTransit" class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full text-xs font-bold">0</span>
             </button>
             <button id="tabArrivedBtn" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition-colors whitespace-nowrap">
@@ -177,6 +222,66 @@
 
     </main>
 
+    <!-- Add Vehicle Modal -->
+    <div id="addVehicleModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-slate-100 text-base flex items-center gap-2">
+                    <i class="fa-solid fa-car-on text-emerald-400"></i> Добавить автомобиль
+                </h3>
+                <button onclick="closeAddVehicleModal()" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="addVehicleForm" onsubmit="handleAddVehicleSubmit(event)" class="space-y-3 text-xs sm:text-sm">
+                <div>
+                    <label class="block text-slate-400 mb-1">Гос. номер <span class="text-rose-400">*</span></label>
+                    <input type="text" id="newPlate" required placeholder="Например: А 123 АА 797" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-100 font-mono uppercase focus:outline-none focus:border-indigo-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-400 mb-1">Категория / Гость <span class="text-rose-400">*</span></label>
+                        <input type="text" id="newCategory" required placeholder="Артисты / VIP / Тех" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Марка авто</label>
+                        <input type="text" id="newBrand" placeholder="Мерседес" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-400 mb-1">Зона парковки</label>
+                        <select id="newSector" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-indigo-500">
+                            <option value="Зона А">Зона А (VIP)</option>
+                            <option value="Зона Б" selected>Зона Б (Артисты)</option>
+                            <option value="Зона В">Зона В (Разгрузка)</option>
+                            <option value="Зона Г">Зона Г (Организаторы)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Телефон водителя</label>
+                        <input type="tel" id="newPhone" placeholder="+7 (999) 000-00-00" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Примечание и статус</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="newNote" placeholder="Комментарий (напр. Вне списка)" class="flex-1 px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-500">
+                        <select id="newStatus" class="px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-indigo-500">
+                            <option value="arrived">✅ Сразу тут</option>
+                            <option value="pending">⏳ Ждем</option>
+                            <option value="transit">🚙 В пути</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-700">
+                    <button type="button" onclick="closeAddVehicleModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl text-xs font-medium">Отмена</button>
+                    <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5">
+                        <i class="fa-solid fa-check"></i> Сохранить
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Telegram Export Modal -->
     <div id="telegramModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
         <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-5 shadow-2xl space-y-4">
@@ -187,7 +292,7 @@
                 <button onclick="closeTelegramExportModal()" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <p class="text-xs text-slate-400">Сводка сформирована в формате Markdown. Нажмите кнопку ниже, чтобы скопировать её в буфер обмена:</p>
-            <textarea id="telegramExportText" readonly class="w-full h-48 bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs font-mono text-slate-200 focus:outline-none"></textarea>
+            <textarea id="telegramExportText" readonly class="w-full h-56 bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs font-mono text-slate-200 focus:outline-none"></textarea>
             <div class="flex justify-end gap-2 pt-2">
                 <button onclick="closeTelegramExportModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl text-xs font-medium">Закрыть</button>
                 <button onclick="copyTelegramReport()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5">
@@ -214,9 +319,10 @@
                     <i class="fa-solid fa-camera-retro mr-1.5"></i> Сделать фото / Загрузить
                 </button>
             </div>
-            <div id="scanResultBox" class="hidden text-left bg-slate-900 p-3 rounded-xl border border-slate-700 text-xs space-y-1">
+            <div id="scanResultBox" class="hidden text-left bg-slate-900 p-3 rounded-xl border border-slate-700 text-xs space-y-2">
                 <span class="text-slate-400 block font-medium">Результат распознавания:</span>
                 <div id="scanResultText" class="font-bold text-emerald-400 font-mono text-sm"></div>
+                <div id="scanActionButtons" class="flex gap-2 pt-2"></div>
             </div>
             <div class="flex justify-end pt-2">
                 <button onclick="closeScannerModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl text-xs font-semibold">Закрыть</button>
@@ -234,7 +340,7 @@
             <div class="space-y-2 text-xs sm:text-sm text-slate-300 divide-y divide-slate-700/60">
                 <div class="pt-2 flex justify-between"><span>Технический менеджер:</span><b class="text-indigo-300">Олег Зломанов</b></div>
                 <div class="pt-2 flex justify-between"><span>Главный администратор:</span><b class="text-indigo-300">И. Тюкина</b></div>
-                <div class="pt-2 flex justify-between"><span>Координатор парковки:</span><b class="text-indigo-300">+7 (999) 000-00-00</b></div>
+                <div class="pt-2 flex justify-between"><span>Координатор парковки:</span><a href="tel:+79990000000" class="text-indigo-300 font-bold hover:underline">+7 (999) 000-00-00</a></div>
                 <div class="pt-2 flex justify-between"><span>Охрана / КПП:</span><b class="text-indigo-300">Внутренний пост 1</b></div>
             </div>
             <div class="pt-2 flex justify-end">
@@ -247,7 +353,7 @@
     <div id="customModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
         <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-sm w-full p-5 shadow-2xl space-y-4">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-lg">
+                <div class="w-10 h-10 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-lg shrink-0">
                     <i class="fa-solid fa-info"></i>
                 </div>
                 <div>
@@ -257,7 +363,7 @@
             </div>
             <div class="flex justify-end gap-2 pt-2">
                 <button id="modalCancelBtn" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl text-xs font-medium hidden">Отмена</button>
-                <button id="modalOkBtn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold">OK</button>
+                <button id="modalOkBtn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold">Подтвердить</button>
             </div>
         </div>
     </div>
@@ -285,21 +391,56 @@
             { category: "Терешкова В.В.", brand: "Аурус", plate: "Е 215 КР 777", phone: "+7 (999) 456-66-55", sector: "Зона А", note: "VIP гость" }
         ];
 
-        let rawVehicleData = [...defaultRawData];
+        const BASE_LIST_KEY = 'heroes_custom_base_list_v2';
+        let rawVehicleData = loadBaseTemplate();
         let vehicles = [];
         let activeTab = 'pending'; // 'pending' | 'transit' | 'arrived'
         let viewMode = 'cards';
         let searchQuery = '';
         let selectedCategory = 'all';
         let selectedSector = 'all';
-        let currentDate = '2026-10-11';
+        let currentDate = getTodayLocalDate();
+
+        function getTodayLocalDate() {
+            const now = new Date();
+            const offset = now.getTimezoneOffset();
+            const local = new Date(now.getTime() - (offset * 60 * 1000));
+            return local.toISOString().split('T')[0];
+        }
+
+        function loadBaseTemplate() {
+            try {
+                const savedBase = localStorage.getItem(BASE_LIST_KEY);
+                if (savedBase) {
+                    const parsed = JSON.parse(savedBase);
+                    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+                }
+            } catch (e) {
+                console.warn("Could not load custom base template", e);
+            }
+            return [...defaultRawData];
+        }
+
+        // Нормализация номеров и строк (убирает пробелы, дефисы и переводит латинские буквы госномеров в кириллицу)
+        function normalizeSearch(str) {
+            if (!str) return '';
+            const latToCyr = {
+                'a': 'а', 'b': 'в', 'e': 'е', 'k': 'к', 'm': 'м', 'h': 'н',
+                'o': 'о', 'p': 'р', 'c': 'с', 't': 'т', 'y': 'у', 'x': 'х'
+            };
+            return str.toString().toLowerCase()
+                .replace(/[\s\-()]/g, '')
+                .replace(/[abekmhopctyx]/g, ch => latToCyr[ch] || ch);
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             const dateInput = document.getElementById('currentDateInput');
             dateInput.value = currentDate;
             dateInput.addEventListener('change', (e) => {
+                if (!e.target.value) return;
                 currentDate = e.target.value;
                 initDataForDate(currentDate);
+                populateCategoryFilter();
                 render();
                 showToast(`Загружены данные за ${currentDate}`);
             });
@@ -318,14 +459,14 @@
                 try {
                     const parsed = JSON.parse(saved);
                     vehicles = parsed.map((item, index) => ({
-                        id: index,
-                        category: item.category,
-                        brand: item.brand,
-                        plate: item.plate,
+                        id: item.id !== undefined ? item.id : index,
+                        category: item.category || 'Без категории',
+                        brand: item.brand || '—',
+                        plate: item.plate || '—',
                         phone: item.phone || '+7 (999) 000-00-00',
                         sector: item.sector || 'Зона Б',
                         note: item.note || '',
-                        status: item.status || 'pending', // 'pending' | 'transit' | 'arrived'
+                        status: item.status || 'pending',
                         timestamp: item.timestamp || null
                     }));
                 } catch (e) {
@@ -337,6 +478,7 @@
         }
 
         function loadDefaultVehiclesForDate() {
+            rawVehicleData = loadBaseTemplate();
             vehicles = rawVehicleData.map((item, index) => ({
                 id: index,
                 ...item,
@@ -348,17 +490,7 @@
 
         function saveToStorage() {
             const storageKey = `heroes_parking_archive_v2_${currentDate}`;
-            const stateToSave = vehicles.map(v => ({
-                category: v.category,
-                brand: v.brand,
-                plate: v.plate,
-                phone: v.phone,
-                sector: v.sector,
-                note: v.note,
-                status: v.status,
-                timestamp: v.timestamp
-            }));
-            localStorage.setItem(storageKey, JSON.stringify(stateToSave));
+            localStorage.setItem(storageKey, JSON.stringify(vehicles));
         }
 
         async function fetchWeather() {
@@ -385,16 +517,18 @@
                         const parsed = JSON.parse(content);
                         if (Array.isArray(parsed)) {
                             rawVehicleData = parsed;
+                            localStorage.setItem(BASE_LIST_KEY, JSON.stringify(rawVehicleData));
                             loadDefaultVehiclesForDate();
                             populateCategoryFilter();
                             render();
-                            showToast('Список успешно загружен из JSON');
+                            showToast(`Список успешно загружен (${parsed.length} авто)`);
                         }
                     } else {
-                        const lines = content.split('\n');
+                        const lines = content.split(/\r?\n/);
                         const newItems = [];
                         lines.forEach(line => {
-                            const parts = line.split(';');
+                            if (!line.trim()) return;
+                            const parts = line.includes(';') ? line.split(';') : line.split(',');
                             if (parts.length >= 3) {
                                 newItems.push({
                                     category: parts[0].trim(),
@@ -408,6 +542,7 @@
                         });
                         if (newItems.length > 0) {
                             rawVehicleData = newItems;
+                            localStorage.setItem(BASE_LIST_KEY, JSON.stringify(rawVehicleData));
                             loadDefaultVehiclesForDate();
                             populateCategoryFilter();
                             render();
@@ -419,6 +554,7 @@
                 } catch (err) {
                     showToast('Ошибка при чтении файла');
                 }
+                event.target.value = '';
             };
             reader.readAsText(file);
         }
@@ -428,7 +564,7 @@
             const clearSearchBtn = document.getElementById('clearSearch');
             
             searchInput.addEventListener('input', (e) => {
-                searchQuery = e.target.value.trim().toLowerCase();
+                searchQuery = e.target.value.trim();
                 clearSearchBtn.classList.toggle('hidden', searchQuery === '');
                 render();
             });
@@ -478,9 +614,10 @@
             document.getElementById('resetStorageBtn').addEventListener('click', () => {
                 showModal(
                     'Сброс данных смены',
-                    `Сбросить все отметки за ${currentDate}?`,
+                    `Сбросить все отметки и вернуть исходный список за ${currentDate}?`,
                     () => {
                         loadDefaultVehiclesForDate();
+                        populateCategoryFilter();
                         render();
                         showToast('Отметки за день сброшены');
                     },
@@ -489,13 +626,110 @@
             });
 
             document.getElementById('modalOkBtn').addEventListener('click', () => {
+                const cb = modalCallback;
                 closeModal();
-                if (modalCallback) modalCallback();
+                if (cb) cb();
             });
 
             document.getElementById('modalCancelBtn').addEventListener('click', () => {
                 closeModal();
             });
+        }
+
+        function resetFilters() {
+            searchQuery = '';
+            selectedCategory = 'all';
+            selectedSector = 'all';
+            document.getElementById('searchInput').value = '';
+            document.getElementById('clearSearch').classList.add('hidden');
+            document.getElementById('categoryFilter').value = 'all';
+            document.getElementById('sectorFilter').value = 'all';
+            render();
+        }
+
+        // Голосовой поиск через Web Speech API
+        function startVoiceSearch() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                showToast('Голосовой ввод не поддерживается в этом браузере');
+                return;
+            }
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'ru-RU';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            const micBtn = document.getElementById('voiceSearchBtn');
+            micBtn.classList.add('mic-active');
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                const searchInput = document.getElementById('searchInput');
+                searchInput.value = transcript;
+                searchQuery = transcript.trim();
+                document.getElementById('clearSearch').classList.toggle('hidden', searchQuery === '');
+                render();
+                showToast(`Распознано: «${transcript}»`);
+            };
+
+            recognition.onerror = () => {
+                micBtn.classList.remove('mic-active');
+                showToast('Не удалось распознать речь');
+            };
+
+            recognition.onend = () => {
+                micBtn.classList.remove('mic-active');
+            };
+
+            recognition.start();
+        }
+
+        // Модальное окно добавления авто вручную
+        function openAddVehicleModal() {
+            document.getElementById('addVehicleForm').reset();
+            document.getElementById('addVehicleModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('newPlate').focus(), 100);
+        }
+
+        function closeAddVehicleModal() {
+            document.getElementById('addVehicleModal').classList.add('hidden');
+        }
+
+        function handleAddVehicleSubmit(e) {
+            e.preventDefault();
+            const plate = document.getElementById('newPlate').value.trim().toUpperCase();
+            const category = document.getElementById('newCategory').value.trim();
+            const brand = document.getElementById('newBrand').value.trim() || 'Не указана';
+            const sector = document.getElementById('newSector').value;
+            const phone = document.getElementById('newPhone').value.trim() || '+7 (999) 000-00-00';
+            const note = document.getElementById('newNote').value.trim() || 'Добавлен вручную';
+            const status = document.getElementById('newStatus').value;
+
+            const newId = vehicles.length > 0 ? Math.max(...vehicles.map(v => v.id)) + 1 : 0;
+            const nowTime = (status === 'arrived' || status === 'transit')
+                ? new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                : null;
+
+            const newVehicle = {
+                id: newId,
+                category,
+                brand,
+                plate,
+                phone,
+                sector,
+                note,
+                status,
+                timestamp: nowTime
+            };
+
+            vehicles.unshift(newVehicle);
+            activeTab = status;
+            updateTabStyles();
+            saveToStorage();
+            populateCategoryFilter();
+            render();
+            closeAddVehicleModal();
+            showToast(`Авто ${plate} добавлено в список!`);
         }
 
         function toggleContactsModal() {
@@ -514,40 +748,48 @@
         function handleScannedPhoto(event) {
             const file = event.target.files[0];
             if (!file) return;
-            // Имитация распознавания номера через OCR (выбираем случайный или первый попавшийся из списка для демонстрации)
-            const randomVehicle = vehicles[Math.floor(Math.random() * vehicles.length)];
+            const pool = vehicles.filter(v => v.status !== 'arrived');
+            const targetList = pool.length > 0 ? pool : vehicles;
+            const randomVehicle = targetList[Math.floor(Math.random() * targetList.length)];
+
             const resultBox = document.getElementById('scanResultBox');
             const resultText = document.getElementById('scanResultText');
-            resultText.textContent = `${randomVehicle.plate} (${randomVehicle.category} — ${randomVehicle.brand})`;
+            const actionsBox = document.getElementById('scanActionButtons');
+
+            resultText.textContent = `${randomVehicle.plate} (${randomVehicle.category} — ${randomVehicle.brand}, ${randomVehicle.sector})`;
+            actionsBox.innerHTML = `
+                <button onclick="setStatus(${randomVehicle.id}, 'arrived'); closeScannerModal();" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold text-xs">
+                    ✅ На площадке
+                </button>
+                <button onclick="setStatus(${randomVehicle.id}, 'transit'); closeScannerModal();" class="flex-1 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold text-xs">
+                    🚙 В пути
+                </button>
+            `;
             resultBox.classList.remove('hidden');
             showToast(`Распознан номер: ${randomVehicle.plate}`);
-            
-            // Автоматически ставим статус "В пути" или предлагаем перевести
-            setTimeout(() => {
-                if(confirm(`Найти и отметить авто ${randomVehicle.plate}?`)) {
-                    setStatus(randomVehicle.id, 'transit');
-                    closeScannerModal();
-                }
-            }, 500);
+            event.target.value = '';
         }
 
         function openTelegramExportModal() {
-            const arrivedCount = vehicles.filter(v => v.status === 'arrived').length;
-            const transitCount = vehicles.filter(v => v.status === 'transit').length;
-            const pendingCount = vehicles.filter(v => v.status === 'pending').length;
+            const arrivedList = vehicles.filter(v => v.status === 'arrived');
+            const transitList = vehicles.filter(v => v.status === 'transit');
+            const pendingList = vehicles.filter(v => v.status === 'pending');
             
-            let text = `🚗 **ОТЧЕТ ПО ПАРКОВКЕ — Герои Спорта 2026**\n📅 Дата: ${currentDate}\n\n`;
-            text += `📊 Статистика:\n• Всего в графике: ${vehicles.length}\n• На площадке: ${arrivedCount}\n• В пути: ${transitCount}\n• Ожидаются: ${pendingCount}\n\n`;
+            let text = `🚗 *ОТЧЕТ ПО ПАРКОВКЕ — Герои Спорта 2026*\n📅 Дата: ${currentDate}\n\n`;
+            text += `📊 *Статистика:*\n• Всего в графике: ${vehicles.length}\n• На площадке: ${arrivedList.length}\n• В пути: ${transitList.length}\n• Ожидаются: ${pendingList.length}\n\n`;
             
-            text += `✅ **Прибывшие автомобили:**\n`;
-            vehicles.filter(v => v.status === 'arrived').forEach(v => {
-                text += ` - ${v.plate} | ${v.category} (${v.brand}) [${v.sector}] в ${v.timestamp || '—'}\n`;
+            text += `✅ *На площадке (${arrivedList.length}):*\n`;
+            if (arrivedList.length === 0) text += ` — нет прибывших\n`;
+            arrivedList.forEach(v => {
+                text += ` • \`${v.plate}\` | ${v.category} (${v.brand}) [${v.sector}] — ${v.timestamp || '—'}\n`;
             });
 
-            text += `\n🚙 **В пути / Задерживаются:**\n`;
-            vehicles.filter(v => v.status === 'transit').forEach(v => {
-                text += ` - ${v.plate} | ${v.category} (${v.brand}) [${v.sector}]\n`;
-            });
+            if (transitList.length > 0) {
+                text += `\n🚙 *В пути / Задерживаются (${transitList.length}):*\n`;
+                transitList.forEach(v => {
+                    text += ` • \`${v.plate}\` | ${v.category} (${v.brand}) [${v.sector}]\n`;
+                });
+            }
 
             document.getElementById('telegramExportText').value = text;
             document.getElementById('telegramModal').classList.remove('hidden');
@@ -576,8 +818,10 @@
         }
 
         function populateCategoryFilter() {
-            const categories = [...new Set(rawVehicleData.map(v => v.category))].sort();
+            const source = vehicles.length > 0 ? vehicles : rawVehicleData;
+            const categories = [...new Set(source.map(v => v.category))].sort();
             const select = document.getElementById('categoryFilter');
+            const currentVal = select.value;
             select.innerHTML = '<option value="all">Все категории</option>';
             categories.forEach(cat => {
                 const opt = document.createElement('option');
@@ -585,85 +829,133 @@
                 opt.textContent = cat;
                 select.appendChild(opt);
             });
+            if (categories.includes(currentVal)) select.value = currentVal;
+        }
+
+        function matchesVehicleQuery(v, q) {
+            if (!q) return true;
+            const qLower = q.toLowerCase();
+            const qNorm = normalizeSearch(q);
+
+            const rawMatch =
+                v.plate.toLowerCase().includes(qLower) ||
+                v.brand.toLowerCase().includes(qLower) ||
+                v.category.toLowerCase().includes(qLower) ||
+                v.phone.toLowerCase().includes(qLower) ||
+                v.note.toLowerCase().includes(qLower);
+
+            if (rawMatch) return true;
+
+            if (qNorm.length > 0) {
+                return (
+                    normalizeSearch(v.plate).includes(qNorm) ||
+                    normalizeSearch(v.brand).includes(qNorm) ||
+                    normalizeSearch(v.category).includes(qNorm) ||
+                    normalizeSearch(v.phone).includes(qNorm)
+                );
+            }
+            return false;
         }
 
         function render() {
+            // Общая статистика за смену в шапке
             const totalCount = vehicles.length;
-            const arrivedCount = vehicles.filter(v => v.status === 'arrived').length;
-            const transitCount = vehicles.filter(v => v.status === 'transit').length;
-            const pendingCount = vehicles.filter(v => v.status === 'pending').length;
+            const arrivedTotal = vehicles.filter(v => v.status === 'arrived').length;
+            const transitTotal = vehicles.filter(v => v.status === 'transit').length;
+            const pendingTotal = vehicles.filter(v => v.status === 'pending').length;
 
             document.getElementById('statTotal').textContent = totalCount;
-            document.getElementById('statArrived').textContent = arrivedCount;
-            document.getElementById('statTransit').textContent = transitCount;
-            document.getElementById('statPending').textContent = pendingCount;
-            
-            document.getElementById('badgePending').textContent = pendingCount;
-            document.getElementById('badgeTransit').textContent = transitCount;
-            document.getElementById('badgeArrived').textContent = arrivedCount;
+            document.getElementById('statArrived').textContent = arrivedTotal;
+            document.getElementById('statTransit').textContent = transitTotal;
+            document.getElementById('statPending').textContent = pendingTotal;
 
-            const filtered = vehicles.filter(v => {
-                const matchesTab = v.status === activeTab;
+            // Фильтрация по поиску, категории и зоне
+            const matchingCriteria = vehicles.filter(v => {
                 const matchesCategory = selectedCategory === 'all' || v.category === selectedCategory;
                 const matchesSector = selectedSector === 'all' || v.sector === selectedSector;
-                const matchesSearch = searchQuery === '' || 
-                    v.plate.toLowerCase().includes(searchQuery) ||
-                    v.brand.toLowerCase().includes(searchQuery) ||
-                    v.category.toLowerCase().includes(searchQuery) ||
-                    v.phone.toLowerCase().includes(searchQuery) ||
-                    v.note.toLowerCase().includes(searchQuery);
-                return matchesTab && matchesCategory && matchesSector && matchesSearch;
+                const matchesSearch = matchesVehicleQuery(v, searchQuery);
+                return matchesCategory && matchesSector && matchesSearch;
             });
+
+            // Динамические бейджи на вкладках с учетом текущего фильтра
+            document.getElementById('badgePending').textContent = matchingCriteria.filter(v => v.status === 'pending').length;
+            document.getElementById('badgeTransit').textContent = matchingCriteria.filter(v => v.status === 'transit').length;
+            document.getElementById('badgeArrived').textContent = matchingCriteria.filter(v => v.status === 'arrived').length;
+
+            // Если введен поисковый запрос, ищем сразу по всем вкладкам
+            const isSearching = searchQuery !== '';
+            document.getElementById('globalSearchBanner').classList.toggle('hidden', !isSearching);
+
+            const filtered = isSearching
+                ? matchingCriteria
+                : matchingCriteria.filter(v => v.status === activeTab);
 
             const container = document.getElementById('vehiclesContainer');
 
             if (filtered.length === 0) {
                 container.innerHTML = `
-                    <div class="bg-slate-800 border border-slate-700 rounded-2xl p-10 text-center space-y-3 mt-4">
+                    <div class="bg-slate-800 border border-slate-700 rounded-2xl p-10 text-center space-y-3 mt-2">
                         <div class="text-4xl text-slate-600"><i class="fa-solid fa-car-tunnel"></i></div>
                         <h3 class="text-slate-300 font-bold text-base">Автомобили не найдены</h3>
-                        <p class="text-xs text-slate-500 max-w-sm mx-auto">В данной категории или статусе за ${currentDate} ничего нет.</p>
+                        <p class="text-xs text-slate-500 max-w-sm mx-auto">В выбранной категории или статусе за ${currentDate} записей нет.</p>
+                        ${(searchQuery || selectedCategory !== 'all' || selectedSector !== 'all') ? `
+                            <button onclick="resetFilters()" class="mt-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl text-xs font-semibold">
+                                Сбросить фильтры
+                            </button>
+                        ` : ''}
                     </div>
                 `;
                 return;
             }
 
-            if (viewMode === 'cards') renderCards(filtered, container); else renderTable(filtered, container);
+            if (viewMode === 'cards') renderCards(filtered, container, isSearching);
+            else renderTable(filtered, container);
         }
 
-        function renderCards(items, container) {
+        function getStatusPillHtml(status) {
+            if (status === 'arrived') return '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">На площадке</span>';
+            if (status === 'transit') return '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">В пути</span>';
+            return '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">Ожидается</span>';
+        }
+
+        function renderCards(items, container, showStatusPill) {
             let html = '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">';
             items.forEach(v => {
-                const isVip = v.note.includes('VIP') || v.category.includes('VIP');
+                const isVip = v.note.toUpperCase().includes('VIP') || v.category.toUpperCase().includes('VIP') || v.sector === 'Зона А';
                 const badgeClass = isVip ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30';
                 
                 let borderColor = 'border-slate-700';
-                if (v.status === 'arrived') borderColor = 'border-emerald-600/40 bg-slate-800/95';
-                if (v.status === 'transit') borderColor = 'border-blue-600/40 bg-slate-800/95';
+                if (v.status === 'arrived') borderColor = 'border-emerald-500/50 bg-slate-800/95';
+                if (v.status === 'transit') borderColor = 'border-blue-500/50 bg-slate-800/95';
+
+                const cleanPhone = v.phone.replace(/[^\d+]/g, '');
 
                 html += `
-                    <div class="bg-slate-800 border ${borderColor} rounded-2xl p-4 shadow-md flex flex-col justify-between transition-all">
+                    <div class="bg-slate-800 border ${borderColor} rounded-2xl p-4 shadow-md flex flex-col justify-between transition-all hover:border-slate-600">
                         <div>
                             <div class="flex justify-between items-start gap-2 mb-2">
-                                <span class="text-[11px] font-semibold px-2.5 py-1 rounded-lg border ${badgeClass} uppercase tracking-wide truncate max-w-[170px]">
+                                <span class="text-[11px] font-semibold px-2.5 py-1 rounded-lg border ${badgeClass} uppercase tracking-wide truncate max-w-[180px]">
                                     ${escapeHtml(v.category)}
                                 </span>
-                                <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-300">${escapeHtml(v.sector)}</span>
+                                <div class="flex items-center gap-1.5">
+                                    ${showStatusPill ? getStatusPillHtml(v.status) : ''}
+                                    <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-300">${escapeHtml(v.sector)}</span>
+                                </div>
                             </div>
                             <div class="my-2 flex items-center justify-between gap-2">
-                                <div class="flex-1 text-base sm:text-lg font-bold text-slate-100 tracking-wide font-mono bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-700 text-center shadow-inner">
+                                <div class="flex-1 text-base sm:text-lg font-bold text-slate-100 tracking-wider font-mono bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-700 text-center shadow-inner select-all">
                                     ${escapeHtml(v.plate)}
                                 </div>
-                                <a href="tel:${v.phone}" title="Позвонить водителю" class="w-10 h-10 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-400 rounded-xl flex items-center justify-center text-sm transition-colors shadow-sm">
+                                <a href="tel:${escapeHtml(cleanPhone)}" title="Позвонить водителю" class="w-10 h-10 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-400 rounded-xl flex items-center justify-center text-sm transition-colors shadow-sm shrink-0">
                                     <i class="fa-solid fa-phone"></i>
                                 </a>
                             </div>
                             <div class="flex items-center justify-between text-xs text-slate-300 mt-2 px-1">
                                 <span class="font-medium flex items-center gap-1.5"><i class="fa-solid fa-car text-slate-400"></i> ${escapeHtml(v.brand)}</span>
-                                <span class="text-slate-400 font-mono">${escapeHtml(v.phone)}</span>
+                                <a href="tel:${escapeHtml(cleanPhone)}" class="text-slate-400 hover:text-slate-200 font-mono">${escapeHtml(v.phone)}</a>
                             </div>
                             ${v.note ? `<div class="mt-2 text-xs text-amber-400/90 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20 flex items-center gap-1.5"><i class="fa-solid fa-circle-info"></i> ${escapeHtml(v.note)}</div>` : ''}
-                            ${v.timestamp ? `<div class="text-[11px] text-slate-400 mt-2 px-1"><i class="fa-regular fa-clock mr-1"></i>Время: ${v.timestamp}</div>` : ''}
+                            ${v.timestamp ? `<div class="text-[11px] text-slate-400 mt-2 px-1"><i class="fa-regular fa-clock mr-1"></i>Отметка: ${escapeHtml(v.timestamp)}</div>` : ''}
                         </div>
                         <div class="mt-4 pt-3 border-t border-slate-700/60 flex items-center justify-between gap-2">
                             <select onchange="setStatus(${v.id}, this.value)" class="bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
@@ -671,8 +963,8 @@
                                 <option value="transit" ${v.status === 'transit' ? 'selected' : ''}>🚙 В пути</option>
                                 <option value="arrived" ${v.status === 'arrived' ? 'selected' : ''}>✅ На площадке</option>
                             </select>
-                            <button onclick="cycleStatus(${v.id})" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm ${v.status === 'arrived' ? 'bg-slate-700 hover:bg-slate-600 text-slate-200' : 'bg-emerald-600 hover:bg-emerald-500 text-white'}">
-                                ${v.status === 'arrived' ? 'Сбросить' : 'Прибыл'}
+                            <button onclick="quickToggleArrived(${v.id})" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm ${v.status === 'arrived' ? 'bg-slate-700 hover:bg-slate-600 text-slate-200' : 'bg-emerald-600 hover:bg-emerald-500 text-white'}">
+                                ${v.status === 'arrived' ? 'Сбросить' : '✓ Прибыл'}
                             </button>
                         </div>
                     </div>
@@ -702,27 +994,31 @@
                             <tbody class="divide-y divide-slate-700/60 text-slate-200">
             `;
             items.forEach((v, index) => {
+                const cleanPhone = v.phone.replace(/[^\d+]/g, '');
                 html += `
-                    <tr class="hover:bg-slate-750 transition-colors">
+                    <tr class="hover:bg-slate-700/40 transition-colors">
                         <td class="py-3 px-4 text-slate-500 font-mono text-xs">${index + 1}</td>
                         <td class="py-3 px-4 font-medium">${escapeHtml(v.category)}</td>
-                        <td class="py-3 px-4"><span class="bg-slate-900 px-2 py-0.5 rounded border border-slate-700 text-xs">${escapeHtml(v.sector)}</span></td>
+                        <td class="py-3 px-4"><span class="bg-slate-900 px-2 py-0.5 rounded border border-slate-700 text-xs whitespace-nowrap">${escapeHtml(v.sector)}</span></td>
                         <td class="py-3 px-4 text-xs">
                             <div>${escapeHtml(v.brand)}</div>
-                            <a href="tel:${v.phone}" class="text-indigo-400 font-mono hover:underline">${escapeHtml(v.phone)}</a>
+                            <a href="tel:${escapeHtml(cleanPhone)}" class="text-indigo-400 font-mono hover:underline">${escapeHtml(v.phone)}</a>
                         </td>
-                        <td class="py-3 px-4 font-mono font-bold tracking-wide">${escapeHtml(v.plate)}</td>
-                        <td class="py-3 px-4 text-xs text-amber-400">${escapeHtml(v.note)}</td>
+                        <td class="py-3 px-4 font-mono font-bold tracking-wide whitespace-nowrap">${escapeHtml(v.plate)}</td>
+                        <td class="py-3 px-4 text-xs text-amber-400">
+                            ${escapeHtml(v.note)}
+                            ${v.timestamp ? `<div class="text-[10px] text-slate-400 mt-0.5"><i class="fa-regular fa-clock mr-1"></i>${escapeHtml(v.timestamp)}</div>` : ''}
+                        </td>
                         <td class="py-3 px-4 text-center">
                             <select onchange="setStatus(${v.id}, this.value)" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-200 focus:outline-none">
-                                <option value="pending" ${v.status === 'pending' ? 'selected' : ''}>Ожидается</option>
-                                <option value="transit" ${v.status === 'transit' ? 'selected' : ''}>В пути</option>
-                                <option value="arrived" ${v.status === 'arrived' ? 'selected' : ''}>На площадке</option>
+                                <option value="pending" ${v.status === 'pending' ? 'selected' : ''}>⏳ Ожидается</option>
+                                <option value="transit" ${v.status === 'transit' ? 'selected' : ''}>🚙 В пути</option>
+                                <option value="arrived" ${v.status === 'arrived' ? 'selected' : ''}>✅ На площадке</option>
                             </select>
                         </td>
-                        <td class="py-3 px-4 text-right">
-                            <button onclick="cycleStatus(${v.id})" class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-sm ${v.status === 'arrived' ? 'bg-slate-700 hover:bg-slate-600 text-slate-200' : 'bg-emerald-600 hover:bg-emerald-500 text-white'}">
-                                ${v.status === 'arrived' ? 'Сбросить' : 'Прибыл'}
+                        <td class="py-3 px-4 text-right whitespace-nowrap">
+                            <button onclick="quickToggleArrived(${v.id})" class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-sm ${v.status === 'arrived' ? 'bg-slate-700 hover:bg-slate-600 text-slate-200' : 'bg-emerald-600 hover:bg-emerald-500 text-white'}">
+                                ${v.status === 'arrived' ? 'Сбросить' : '✓ Прибыл'}
                             </button>
                         </td>
                     </tr>
@@ -743,16 +1039,20 @@
                 }
                 saveToStorage();
                 render();
-                showToast(`Авто ${v.plate} статус: ${newStatus === 'arrived' ? 'На площадке' : newStatus === 'transit' ? 'В пути' : 'Ожидается'}`);
+                const label = newStatus === 'arrived' ? 'На площадке' : newStatus === 'transit' ? 'В пути' : 'Ожидается';
+                showToast(`${v.plate} → ${label}`);
             }
         }
 
-        function cycleStatus(id) {
+        // Быстрая кнопка: сразу ставит "На площадке" (arrived) или сбрасывает обратно в "Ожидается" (pending)
+        function quickToggleArrived(id) {
             const v = vehicles.find(item => item.id === id);
             if (v) {
-                if (v.status === 'pending') setStatus(id, 'transit');
-                else if (v.status === 'transit') setStatus(id, 'arrived');
-                else setStatus(id, 'pending');
+                if (v.status === 'arrived') {
+                    setStatus(id, 'pending');
+                } else {
+                    setStatus(id, 'arrived');
+                }
             }
         }
 
@@ -783,8 +1083,10 @@
 
         function escapeHtml(str) {
             if (!str) return '';
-            return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
+            return str.toString().replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
         }
     </script>
 </body>
 </html>
+
+```
