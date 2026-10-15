@@ -36,7 +36,7 @@
                 <div>
                     <div class="flex items-center gap-2 flex-wrap">
                         <span id="eventBadgeDisplay" onclick="openEventTitleModal()" title="Нажмите, чтобы изменить название мероприятия" class="bg-indigo-600 hover:bg-indigo-500 cursor-pointer text-white text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider transition-colors">
-                            Герои Спорта 2026
+                            Басков 2026
                         </span>
                         
                         <!-- Venue Selector -->
@@ -58,7 +58,7 @@
 
                     <div class="flex items-center gap-2 mt-0.5 group">
                         <h1 id="eventTitleDisplay" onclick="openEventTitleModal()" class="text-lg sm:text-xl font-bold text-white tracking-tight cursor-pointer hover:text-indigo-300 transition-colors">
-                            «Мы верим твердо в героев спорта»
+                            «ЮБИЛЕЙНЫЕ КОНЦЕРТЫ НИКОЛАЯ БАСКОВА»
                         </h1>
                         <button onclick="openEventTitleModal()" title="Редактировать название мероприятия" class="text-slate-400 hover:text-indigo-400 text-xs p-1 rounded-lg bg-slate-900/60 border border-slate-700/80 transition-colors">
                             <i class="fa-solid fa-pen"></i>
@@ -282,13 +282,10 @@
 
     </main>
 
-    <!-- ========================================================================= -->
-    <!-- FULLSCREEN MATCH OVERLAY (Полноэкранное окно совпадения для КПП)          -->
-    <!-- ========================================================================= -->
+    <!-- FULLSCREEN MATCH OVERLAY (Полноэкранное окно совпадения для КПП) -->
     <div id="fullscreenMatchOverlay" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex flex-col p-4 sm:p-6 hidden overflow-y-auto">
         <div class="max-w-3xl w-full mx-auto flex-1 flex flex-col justify-between gap-4">
             
-            <!-- Top Bar inside Fullscreen Overlay: Live Search Input & Close -->
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-900 border border-slate-700/80 p-3 sm:p-4 rounded-2xl shadow-xl">
                 <div class="flex items-center gap-2.5 flex-1">
                     <div class="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center text-lg shrink-0">
@@ -313,17 +310,15 @@
                 </div>
             </div>
 
-            <!-- Dynamic Content: Single Giant Card OR Multiple Selection Cards -->
             <div id="overlayMatchCardsContainer" class="my-auto py-2"></div>
 
-            <!-- Bottom Hint -->
             <div class="text-center text-xs text-slate-500 pb-1">
                 Нажмите <b class="text-emerald-400">«Заехал»</b> для мгновенной фиксации времени прибытия и возврата к дежурству
             </div>
         </div>
     </div>
 
-    <!-- Import from Table (Excel / Google Sheets / CSV) Modal -->
+    <!-- Import Modal -->
     <div id="importModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
         <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-center">
@@ -341,7 +336,7 @@
                 </div>
             </div>
 
-            <textarea id="pasteTableInput" rows="6" placeholder="Пример строк (через табуляцию, точку с запятой или запятую):&#10;Шаман	Мерседес	Х 845 ОМ 797	+79998889900	VIP	Артист&#10;Техслужба	Газель	А 123 ВС 777	+79991112233	Деборкадер	Разгрузка" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs font-mono text-slate-100 focus:outline-none focus:border-indigo-500"></textarea>
+            <textarea id="pasteTableInput" rows="6" placeholder="Пример строк..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs font-mono text-slate-100 focus:outline-none focus:border-indigo-500"></textarea>
 
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
                 <div class="flex items-center gap-3 text-xs">
@@ -358,7 +353,7 @@
                 <div>
                     <input type="file" id="fileUploadInput" accept=".csv, .json, .txt" class="hidden" onchange="handleFileUpload(event)">
                     <button type="button" onclick="document.getElementById('fileUploadInput').click()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl text-xs font-medium flex items-center gap-1.5">
-                        <i class="fa-solid fa-file-arrow-up text-indigo-400"></i> Или выбрать файл (.CSV / .JSON)
+                        <i class="fa-solid fa-file-arrow-up text-indigo-400"></i> Или выбрать файл
                     </button>
                 </div>
             </div>
@@ -425,8 +420,7 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-slate-400 mb-1">Зона парковки <span class="text-rose-400">*</span></label>
-                        <select id="newSector" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-indigo-500">
-                        </select>
+                        <select id="newSector" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-indigo-500"></select>
                     </div>
                     <div>
                         <label class="block text-slate-400 mb-1">Телефон водителя</label>
@@ -465,11 +459,7 @@
                 </div>
                 <button onclick="closeContactsModal()" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-
-            <!-- List of Staff Contacts with Zone Selectors -->
             <div id="contactsListContainer" class="space-y-2 overflow-y-auto pr-1 flex-1 divide-y divide-slate-700/60 text-xs sm:text-sm"></div>
-
-            <!-- Add New Contact Form -->
             <form id="addContactForm" onsubmit="handleAddContactSubmit(event)" class="bg-slate-900/90 border border-slate-700 rounded-xl p-3.5 space-y-3">
                 <div class="text-xs font-semibold text-indigo-400 flex items-center gap-1.5">
                     <i class="fa-solid fa-user-plus"></i> Добавить ответственного в смену
@@ -488,7 +478,6 @@
                     </button>
                 </div>
             </form>
-
             <div class="pt-1 flex justify-end">
                 <button onclick="closeContactsModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl text-xs font-semibold">Готово</button>
             </div>
@@ -504,7 +493,6 @@
                 </h3>
                 <button onclick="closeTelegramExportModal()" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <p class="text-xs text-slate-400">Сводка включает погоду, рассвет/закат, время прибытия/убытия и список ответственных по зонам:</p>
             <textarea id="telegramExportText" readonly class="w-full h-64 bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs font-mono text-slate-200 focus:outline-none"></textarea>
             <div class="flex justify-end gap-2 pt-2">
                 <button onclick="closeTelegramExportModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl text-xs font-medium">Закрыть</button>
@@ -559,7 +547,7 @@
 
     <!-- Footer -->
     <footer class="bg-slate-900 border-t border-slate-800 py-3 text-center text-xs text-slate-500">
-        <span id="footerEventBadge">Герои Спорта 2026</span> &bull; <span id="footerVenueText">Лайв Арена</span> &bull; Система контроля времени прибытия и убытия автотранспорта
+        <span id="footerEventBadge">Басков 2026</span> &bull; <span id="footerVenueText">Лайв Арена</span> &bull; Система контроля времени прибытия и убытия автотранспорта
     </footer>
 
     <!-- JavaScript Application Logic -->
@@ -580,19 +568,200 @@
         ];
 
         const defaultRawData = [
-            { category: "Букеты", brand: "Фольксваген", plate: "Н 331 АН 997", phone: "+7 (999) 111-22-33", sector: "Деборкадер", note: "Разгрузка" },
-            { category: "РПГ", brand: "Лексус", plate: "Н 819 НС 790", phone: "+7 (999) 222-33-44", sector: "Стилобат", note: "" },
-            { category: "РПГ", brand: "Смарт", plate: "Н 755 НЕ 799", phone: "+7 (999) 333-44-55", sector: "Стилобат", note: "" },
-            { category: "РПГ", brand: "БМВ", plate: "К 651 ВМ 797", phone: "+7 (999) 444-55-66", sector: "P3", note: "" },
-            { category: "Организаторы", brand: "Тойота", plate: "М 104 КУ 777", phone: "+7 (999) 555-66-77", sector: "Служебная парковка", note: "О.Львова" },
-            { category: "Организаторы", brand: "Мерседес", plate: "Е 475 ОМ 198", phone: "+7 (999) 666-77-88", sector: "Служебная парковка", note: "И.Тюкина" },
-            { category: "Д.Губерниев", brand: "БМВ", plate: "А 704 АА 150", phone: "+7 (999) 777-88-99", sector: "VIP", note: "Ведущий" },
-            { category: "Шаман", brand: "Мерседес", plate: "Х 845 ОМ 797", phone: "+7 (999) 888-99-00", sector: "VIP", note: "Артист" },
-            { category: "Л.Лещенко", brand: "Мерседес", plate: "А 978 ЕХ 797", phone: "+7 (999) 000-11-22", sector: "VIP", note: "Артист" },
-            { category: "Л.Долина", brand: "Тойота", plate: "О 056 МР 77", phone: "+7 (999) 123-99-88", sector: "VIP", note: "Артист" },
-            { category: "С.Хоркина", brand: "Воях", plate: "Р 524 АЕ 997", phone: "+7 (999) 234-88-77", sector: "VIP", note: "VIP спортсмен" },
-            { category: "Д.Носов", brand: "Фольксваген", plate: "М 591 КР 550", phone: "+7 (999) 345-77-66", sector: "VIP", note: "VIP спортсмен" },
-            { category: "Терешкова В.В.", brand: "Аурус", plate: "Е 215 КР 777", phone: "+7 (999) 456-66-55", sector: "VIP", note: "VIP гость" }
+            // VIP ПАРКИНГ
+            { category: "Н.Басков", brand: "Mercedes-Maybach", plate: "А 265 МР 77", phone: "", sector: "VIP", note: "" },
+            { category: "Н.Басков", brand: "Аурус", plate: "А 003 АА", phone: "", sector: "VIP", note: "" },
+            { category: "С.В.Чемезов", brand: "Аурус", plate: "Х 177 ЕС 977", phone: "", sector: "VIP", note: "" },
+            { category: "Ф.Киркоров", brand: "Аурус", plate: "M 200 OO 977", phone: "", sector: "VIP", note: "" },
+            { category: "Шаман", brand: "Mercedes V-Class", plate: "Х 845 ОМ 797", phone: "", sector: "VIP", note: "транзит" },
+            { category: "С.Михайлов", brand: "Mercedes Maybach", plate: "C 777 CC 197", phone: "", sector: "VIP", note: "транзит" },
+            { category: "Л.Успенская", brand: "Роллс-Ройс", plate: "Е 777 КК 750", phone: "", sector: "VIP", note: "транзит" },
+            { category: "Севиль", brand: "Lixiang", plate: "Н 930 ХК 797", phone: "", sector: "VIP", note: "транзит" },
+            { category: "А.Буйнов", brand: "Лексус", plate: "М 100 ММ 190", phone: "", sector: "VIP", note: "транзит" },
+            { category: "Г.Лепс", brand: "Мерседес Майбах", plate: "X 383 KM 977", phone: "", sector: "VIP", note: "транзит" },
+            { category: "Х.Герзмава", brand: "ZEEKR 009", plate: "С 007 КС 199", phone: "", sector: "VIP", note: "транзит" },
+            { category: "П.Гагарина", brand: "Mercedes", plate: "Т 009 КМ 197", phone: "", sector: "VIP", note: "транзит" },
+            { category: "Лолита", brand: "Toyota Land Cruiser", plate: "Х 454 НВ 177", phone: "", sector: "VIP", note: "транзит" },
+            { category: "С.Лазарев", brand: "Range Rover", plate: "Х 111 ВС 199", phone: "", sector: "VIP", note: "транзит" },
+            { category: "Жасмин", brand: "Роллс Ройс", plate: "Х 777 ЕХ 50", phone: "", sector: "VIP", note: "транзит" },
+            { category: "Валерия", brand: "Zeekr", plate: "С 836 ОО 977", phone: "", sector: "VIP", note: "транзит" },
+            { category: "Л.Долина", brand: "Тойота", plate: "О 056 МР 77", phone: "", sector: "VIP", note: "транзит" },
+            { category: "Алсу", brand: "Mercedes-Maybach", plate: "В 777 НР 777", phone: "", sector: "VIP", note: "транзит" },
+            { category: "И.Крутой", brand: "Мерседес", plate: "К 641 НУ 777", phone: "", sector: "VIP", note: "транзит" },
+            { category: "О.Крутая", brand: "Мерседес", plate: "Т 002 ТР 199", phone: "", sector: "VIP", note: "транзит" },
+            { category: "А.Лорак", brand: "Мерседес", plate: "E 603 MA 799", phone: "", sector: "VIP", note: "транзит" },
+            { category: "Л.Лещенко", brand: "Мерседес Майбах", plate: "А 978 ЕХ 797", phone: "", sector: "VIP", note: "транзит" },
+            { category: "Е.Петросян", brand: "Хунцы", plate: "В 711 МР 77", phone: "", sector: "VIP", note: "транзит" },
+            { category: "Аш23", brand: "Exeed", plate: "О 023 ТУ 193", phone: "", sector: "Стилобат", note: "" },
+            { category: "Серёга", brand: "Belgee", plate: "Р 538 НН 977", phone: "", sector: "Стилобат", note: "" },
+            { category: "Натали", brand: "Тойота камри", plate: "О 682 КТ 797", phone: "", sector: "Стилобат", note: "" },
+            { category: "Повалий", brand: "БМВ Х5", plate: "А 306 АН 977", phone: "", sector: "Стилобат", note: "" },
+            { category: "Дискотека авария Серов", brand: "БМВ", plate: "С 529 ХС 797", phone: "", sector: "Стилобат", note: "" },
+            { category: "Дискотека авария Рыжов", brand: "LAND ROVER", plate: "X 538 CP 37", phone: "", sector: "Стилобат", note: "" },
+            { category: "Чумаков", brand: "Мерседес Майбах", plate: "Е 001 ХН 197", phone: "", sector: "Стилобат", note: "" },
+            { category: "Сумачева", brand: "Мерседес Майбах", plate: "М 694 ММ 777", phone: "", sector: "Стилобат", note: "" },
+            { category: "транзит на Р3", brand: "Мерседес Майбах", plate: "В 001 ВВ 177", phone: "", sector: "P3", note: "" },
+            { category: "транзит на Р3", brand: "Мерседес", plate: "А 742 МР 77", phone: "", sector: "P3", note: "" },
+            { category: "транзит на Р3", brand: "Порш", plate: "В 825 ОЕ 197", phone: "", sector: "P3", note: "" },
+            { category: "транзит на Р3", brand: "Джип грандчероки", plate: "О 250 ОО 178", phone: "", sector: "P3", note: "" },
+            { category: "транзит на Р3", brand: "Майбах", plate: "Е 545 РЕ 177", phone: "", sector: "P3", note: "" },
+            { category: "транзит на Р3", brand: "Майбах", plate: "Р 006 СА 197", phone: "", sector: "P3", note: "" },
+            { category: "транзит на Р3", brand: "Мерседес", plate: "С 006 НН 199", phone: "", sector: "P3", note: "" },
+            { category: "транзит на Р3", brand: "Мерседес бенц", plate: "У 101 АВ 99", phone: "", sector: "P3", note: "" },
+            { category: "транзит на Р3", brand: "Дженезис", plate: "Н 777 ВМ 197", phone: "", sector: "P3", note: "" },
+            { category: "транзит на Р3", brand: "Мерседес", plate: "А 052 МО 77", phone: "", sector: "P3", note: "" },
+            { category: "транзит на Р3", brand: "Бентли", plate: "У 005 СУ 177", phone: "", sector: "P3", note: "" },
+            { category: "транзит на Р3", brand: "Мерседес минивен", plate: "М 999 МО 199", phone: "", sector: "P3", note: "" },
+            { category: "транзит на Р3", brand: "Дженезис", plate: "К 088 МР 77", phone: "", sector: "P3", note: "" },
+            { category: "транзит на Р3", brand: "Мерседе Вито", plate: "Р 555 МО 197", phone: "", sector: "P3", note: "" },
+            { category: "транзит на Р3", brand: "Киа сид", plate: "А 234 АХ 797", phone: "", sector: "P3", note: "" },
+            { category: "транзит на Р3", brand: "Лексус", plate: "А 034 ММ 99", phone: "", sector: "P3", note: "" },
+            { category: "транзит на Р3", brand: "Зикр", plate: "А 429 МР 77", phone: "", sector: "P3", note: "" },
+            { category: "транзит на Р3", brand: "Тойота камри", plate: "О 5289 50", phone: "", sector: "P3", note: "" },
+            { category: "транзит на Р3", brand: "Майбах", plate: "М 777 АА 177", phone: "", sector: "P3", note: "" },
+            { category: "транзит на Р3", brand: "Мерседес", plate: "А 398 АА 77", phone: "", sector: "P3", note: "" },
+            { category: "транзит на Р3", brand: "Мерседес", plate: "А 473 АА 777", phone: "", sector: "P3", note: "" },
+            { category: "транзит на Р3", brand: "Воях дрим", plate: "В 393 ХВ 799", phone: "", sector: "P3", note: "" },
+            { category: "Транзит автобусная полоса", brand: "Aurus Senat", plate: "С 780 ХК 797", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "Toyota Camry", plate: "А 6246 99", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "Тoyota Land Cruiser", plate: "А 6195 99", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "Toyota Land Cruiser", plate: "A 6373 99", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "Toyota Land Cruiser", plate: "Т 376 УА 797", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "Тoyota Camry", plate: "X 344 TH 797", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "Bentley", plate: "О 777 ОО 50", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "AURUS Senat", plate: "С 956 ХХ 797", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "Toyota Land Cruiser", plate: "A 6377 99", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "Haval", plate: "А 2397 77", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "Mercedes", plate: "А 188 МО 97", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "Mercedes G900", plate: "Р 777 ХХ 90", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "Mercedes G63", plate: "Р 777 ХХ 50", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "Mercedes V class", plate: "М 777 КК 750", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "Bentley GT", plate: "С 777 ХХ 99", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "Mercedes", plate: "Х 375 ХЕ 797", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "BMW", plate: "С 588 ХМ 797", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "Voyah Dream", plate: "К 528 УК 797", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "Mercedes", plate: "Т 087 ТТ 77", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "Toyota", plate: "М 621 РУ 797", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "Renge rover", plate: "А 127 СР 797", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "Cadillac", plate: "М 121 ХМ 797", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "Mercedes Maybach", plate: "С 813 СС 77", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "Mercedes", plate: "О 456 НР 977", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "Hyundai", plate: "А 030 ВС 797", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "Hyundai", plate: "Е 198 КР 777", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "Lexus", plate: "Н 434 СУ 797", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "BMW Х7", plate: "А 264 УО 797", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "Транзит автобусная полоса", brand: "Toyota Land Cruiser", plate: "A 6033 99", phone: "", sector: "Стилобат", note: "Транзит автобусная полоса" },
+            { category: "И.Батуров", brand: "Мерседес", plate: "Р 006 КМ 197", phone: "", sector: "Деборкадер", note: "" },
+            { category: "Олейникова", brand: "Фольксваген", plate: "А 517 АО 777", phone: "", sector: "Деборкадер", note: "" },
+            { category: "Болтенко", brand: "Мерседес", plate: "В 900 МР 77", phone: "", sector: "Деборкадер", note: "" },
+            { category: "Дурдаева", brand: "Ауди", plate: "М 727 ХМ 98", phone: "", sector: "Деборкадер", note: "" },
+            { category: "Ситникова", brand: "Хендай ix35", plate: "К 567 МТ 178", phone: "", sector: "Деборкадер", note: "" },
+            { category: "Пиктурный", brand: "Опель", plate: "Т 326 ХУ 197", phone: "", sector: "Деборкадер", note: "" },
+            { category: "Асанов", brand: "BMW", plate: "Т 009 СЕ 77", phone: "", sector: "Деборкадер", note: "" },
+            { category: "Шаман директор", brand: "Cadillac Escalade", plate: "Р 018 ЕС 977", phone: "", sector: "Деборкадер", note: "" },
+            { category: "", brand: "Mercedes", plate: "Т 018 ХЕ 797", phone: "", sector: "Деборкадер", note: "" },
+            { category: "Михайлов директор", brand: "БМВ", plate: "К 005 СВ 77", phone: "", sector: "Деборкадер", note: "" },
+            { category: "Севиль директор", brand: "Lixiang", plate: "E 092 HM 977", phone: "", sector: "Деборкадер", note: "" },
+            { category: "Буйнов директор", brand: "Форд", plate: "Н 680 АВ 777", phone: "", sector: "Деборкадер", note: "" },
+            { category: "Лепс директор", brand: "Мерседес", plate: "O 777 CE 55", phone: "", sector: "Деборкадер", note: "" },
+            { category: "Герзмава директор", brand: "БМВ", plate: "М 399 ХА 797", phone: "", sector: "Деборкадер", note: "" },
+            { category: "Лолита директор", brand: "Хавал", plate: "Р 493 МУ 977", phone: "", sector: "Деборкадер", note: "" },
+            { category: "Лазарев директор", brand: "Lexus", plate: "E 850 XM 799", phone: "", sector: "Деборкадер", note: "" },
+            { category: "Жасмин директор", brand: "Лексус", plate: "К 777 АА 150", phone: "", sector: "Деборкадер", note: "" },
+            { category: "Валерия директор", brand: "Киа", plate: "С 777 ВО 250", phone: "", sector: "Деборкадер", note: "" },
+            { category: "Долина Женя", brand: "Хонда", plate: "К 902 ЕЕ 799", phone: "", sector: "Деборкадер", note: "" },
+            { category: "Киркоров директор", brand: "Мерседес", plate: "К 500 ОТ 77", phone: "", sector: "Деборкадер", note: "" },
+            { category: "Дискотека директор", brand: "Тойота", plate: "В 232 ХХ 790", phone: "", sector: "Деборкадер", note: "" },
+            { category: "Лорак директор", brand: "Мерседес", plate: "4400МЕ-7", phone: "", sector: "Деборкадер", note: "" },
+            { category: "РПГ Шикалов", brand: "Ауди", plate: "Н 933 НК 799", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "РПГ Игнатчик", brand: "KIA Sportage", plate: "Н 131 ВХ 797", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "РПГ Денисенко", brand: "KIA X-Line", plate: "О 744 АА 790", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Середин", brand: "Солерс Атлант", plate: "Т 078 НТ 797", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "РПГ Стадник", brand: "Exeed VX", plate: "Е 648 ОС 977", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "грим", brand: "Ауди", plate: "В 560 АК 799", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "грим", brand: "Тойота", plate: "Т 949 СТ 199", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "огненный кол-в", brand: "Фольксваген Тигуан", plate: "К 523 ЕА 777", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Ракета медиа", brand: "Kia Rio X-line", plate: "О 608 КО 71", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Ракета медиа", brand: "Exeed LX", plate: "С 892 РВ 797", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Ракета медиа", brand: "Voyah", plate: "Т 523 МС 977", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "костюмер", brand: "Jetta VS5", plate: "У 460 ОР 797", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Бразильский коллектив", brand: "Чери тиго", plate: "Н 448 КС 977", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Бразильский коллектив", brand: "Киа Соул", plate: "В 975 КВ 198", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "балет", brand: "Skoda Octavia", plate: "У 975 ОВ 797", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "балет", brand: "Changang", plate: "К 675 НР 977", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "балет", brand: "Хендай Крета", plate: "С 805 МО 142", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "балет", brand: "Тойота Королла", plate: "О 986 АС 250", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Эйхвальд", brand: "Рейнж Ровер", plate: "В 765 УН 797", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Казанцева", brand: "Тойота", plate: "Х 679 ТУ 799", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Мостовлюк", brand: "Мини купер", plate: "О 074 ВО 250", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Коллектив Коли", brand: "Toyota", plate: "К 450 ХО 750", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Коллектив Коли", brand: "Mercedes", plate: "В 241 СЕ 777", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Коллектив Коли", brand: "Volkswagen", plate: "А 050 КХ 197", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Коллектив Коли", brand: "Voyah", plate: "O 462 MC 977", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Коллектив Коли", brand: "Lada", plate: "В 784 КЕ 77", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Коллектив Коли", brand: "Mercedes", plate: "В 554 НЕ 799", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Коллектив Коли", brand: "Jaecoo", plate: "С 013 ВВ 977", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Коллектив Коли", brand: "Haval F7", plate: "В 632 ВХ 250", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Коллектив Коли", brand: "Changan", plate: "С 018 АТ 550", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Коллектив Коли", brand: "Mazda", plate: "E 789 HC 777", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Коллектив Коли", brand: "Mercedes", plate: "Т 201 ХВ 797", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Коллектив Коли", brand: "Kia Rio", plate: "С 129 ВТ 797", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Коллектив Коли", brand: "Мерседес", plate: "О 808 РТ 777", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Коллектив Коли", brand: "Киа Соул", plate: "М 741 ХЕ 777", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Оркестр дирижер", brand: "Lixiang L9", plate: "М 736 КО 977", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Оркестр директор", brand: "Belgee", plate: "А 307 МЕ 977", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Михайлов звук", brand: "БМВ", plate: "А 138 ВМ 550", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Севиль звук", brand: "HAVAL", plate: "T 344 XA 224", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Гагарина охрана", brand: "Hyundai i40", plate: "А 662 ТТ 105", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Гагарина звук", brand: "Toyota", plate: "C 602 XP 77", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Гагарина парикмах", brand: "Mini Cooper", plate: "M 145 MB 977", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Гагарина админ", brand: "Audi", plate: "Р 067 ТУ 799", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Гагарина помощник", brand: "Land Rover", plate: "О 408 МР 154", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Лазарев звук", brand: "Мазда", plate: "У 771 МВ 777", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Жасмин костюмы", brand: "Мерседес", plate: "С 231 КК 797", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Жасмин гример", brand: "Ягуар", plate: "Р 676 АС 77", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Жасмин стилист", brand: "Мерседес", plate: "О 469 ХР 799", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Валерия гример", brand: "Лексус", plate: "Н 501 РВ 799", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Алсу вторая машина", brand: "Тойота камри", plate: "А554СМ799", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Киркоров пиар", brand: "Порше", plate: "В 684 КР 977", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Кирккоров грим", brand: "Мерседес", plate: "В 757 ОР 777", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Киркоров костюмы", brand: "Киа", plate: "Т 557 РР 154", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Киркоров Борисов", brand: "Exeed", plate: "С 537 ОЕ 977", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Киркоров звук", brand: "Опель", plate: "Р 603 НУ 797", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Лорак грим", brand: "Хонда", plate: "Е 771 УВ 797", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Лорак костюм", brand: "Вольво", plate: "К 056 ХТ 777", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Дискотека звукореж", brand: "Хендай", plate: "В 896 ТН 790", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Хор", brand: "Фольксваген", plate: "С596МВ197", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Хор", brand: "Тойота", plate: "М319ОА799", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "грим", brand: "Фольксваген", plate: "Т 758 АТ 550", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Мерч", brand: "OMODA C5", plate: "Р 095 ОЕ 199", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Мерч", brand: "LADA largus", plate: "В 368 АМ 997", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Лещенко админ", brand: "Мерседес", plate: "Н 717 ОН 177", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Гриц ТВ", brand: "Ауди", plate: "У 468 НТ 799", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Ванявин юрист", brand: "Мазда", plate: "В 636 МТ 799", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Осипенко фониатр", brand: "Хендай", plate: "М 005 РО 90", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Координатор парковка", brand: "ГАС", plate: "С 640 УК 69", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Координатор парковка", brand: "Тойота РАФ4", plate: "У 315 ОХ 197", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "Леснова И.Б.", brand: "Мерседес", plate: "Х 525 ОК 77", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "пресса", brand: "Chery Tiggo", plate: "К 616 КС 977", phone: "", sector: "Деборкадер", note: "" },
+            { category: "пресса", brand: "Chery Tiggo", plate: "Е 860 ЕК 977", phone: "", sector: "Деборкадер", note: "" },
+            { category: "паркуется", brand: "Maybach", plate: "M767MP77", phone: "", sector: "Стилобат", note: "" },
+            { category: "Стилобат транзит", brand: "Mercedes", plate: "C345CO799", phone: "", sector: "Стилобат", note: "" },
+            { category: "Стилобат транзит", brand: "Aurus", plate: "K228EM977", phone: "", sector: "Стилобат", note: "" },
+            { category: "Стилобат транзит", brand: "Geely", plate: "A911MO77", phone: "", sector: "Стилобат", note: "" },
+            { category: "Стилобат транзит", brand: "Toyota", plate: "У443TT99", phone: "", sector: "Стилобат", note: "" },
+            { category: "Стилобат транзит", brand: "Mercedes", plate: "O080BP797", phone: "", sector: "Стилобат", note: "" },
+            { category: "VIP", brand: "Range Rover", plate: "A476AA177", phone: "", sector: "VIP", note: "" },
+            { category: "транзит P3", brand: "Porsche", plate: "Т999КР 177", phone: "", sector: "Стилобат", note: "" },
+            { category: "Саморукова Ульяна Павловна", brand: "ZEEKR", plate: "В783УК797", phone: "", sector: "Служебная парковка", note: "" },
+            { category: "P3", brand: "хендай", plate: "Р770УА799", phone: "", sector: "P3", note: "" },
+            { category: "P3", brand: "Geely", plate: "H515AA799", phone: "", sector: "P3", note: "" },
+            { category: "транзит VIP", brand: "Мерседес", plate: "О 321 АХ 550", phone: "", sector: "VIP", note: "" },
+            { category: "VIP", brand: "Toyota", plate: "M519KP197", phone: "", sector: "VIP", note: "" },
+            { category: "Стилобат", brand: "Аурус", plate: "А 747 ЕР 97", phone: "", sector: "Стилобат", note: "" },
+            { category: "Стилобат", brand: "Мерседес", plate: "В 005 МР 77", phone: "", sector: "Стилобат", note: "" },
+            { category: "Парковка", brand: "Mercedes", plate: "А 029 АА 197", phone: "", sector: "Стилобат", note: "" },
+            { category: "Транзит", brand: "Jetour", plate: "А 131 ТВ 797", phone: "", sector: "Деборкадер", note: "" }
         ];
 
         const LEGACY_SECTOR_MAP = {
@@ -602,7 +771,7 @@
             "Зона Г": "Служебная парковка"
         };
 
-        const BASE_LIST_KEY = 'heroes_custom_base_list_v4';
+        const BASE_LIST_KEY = 'heroes_custom_base_list_v5'; // Увеличена версия для автоматической перезаписи списка
         const STAFF_LIST_KEY = 'heroes_staff_contacts_v2';
         const VENUES_LIST_KEY = 'heroes_venues_list_v1';
         const EVENT_INFO_KEY = 'heroes_event_header_info_v1';
@@ -662,9 +831,10 @@
             } catch (e) {
                 console.warn(e);
             }
+            // ОБНОВЛЕННЫЕ ДАННЫЕ МЕРОПРИЯТИЯ ПО УМОЛЧАНИЮ
             return {
-                badge: 'Герои Спорта 2026',
-                title: '«Мы верим твердо в героев спорта»'
+                badge: 'Басков 2026',
+                title: '«ЮБИЛЕЙНЫЕ КОНЦЕРТЫ НИКОЛАЯ БАСКОВА»'
             };
         }
 
@@ -752,6 +922,7 @@
             } catch (e) {
                 console.warn("Could not load custom base template", e);
             }
+            localStorage.setItem(BASE_LIST_KEY, JSON.stringify(defaultRawData));
             return [...defaultRawData];
         }
 
@@ -766,7 +937,6 @@
                 .replace(/[abekmhopctyx]/g, ch => latToCyr[ch] || ch);
         }
 
-        // Извлекает основную цифровую часть госномера (первая группа цифр, напр. "331" из "Н 331 АН 997")
         function extractPlateMainDigits(plateStr) {
             if (!plateStr) return '';
             const m = plateStr.match(/\d{3}/);
@@ -805,6 +975,42 @@
             fetchWeatherForDate(currentDate);
             initDataForDate(currentDate);
             setupEventListeners();
+
+            // --- АВТОМАТИЧЕСКОЕ ВОССТАНОВЛЕНИЕ СТАТУСА 39 МАШИН ИЗ ОТЧЕТА ---
+            const recoveryKey = `heroes_baskov_15oct_recovery_run_${currentDate}`;
+            if (!localStorage.getItem(recoveryKey)) {
+                const restoreArrived = [
+                    { p: "А 003 АА", t: "13:39" }, { p: "А 265 МР 77", t: "13:36" }, { p: "МЕРСЕДЕС", t: "10:44" },
+                    { p: "А 517 АО 777", t: "12:18" }, { p: "М 727 ХМ 98", t: "12:19" }, { p: "Т 009 СЕ 77", t: "12:20" },
+                    { p: "АУДИ", t: "11:58" }, { p: "Н 131 ВХ 797", t: "12:00" }, { p: "О 744 АА 790", t: "12:06" },
+                    { p: "Е 648 ОС 977", t: "12:05" }, { p: "В 560 АК 799", t: "11:56" }, { p: "Т 949 СТ 199", t: "10:12" },
+                    { p: "К 523 ЕА 777", t: "12:11" }, { p: "Т 523 МС 977", t: "12:09" }, { p: "К 675 НР 977", t: "12:12" },
+                    { p: "С 805 МО 142", t: "11:54" }, { p: "О 986 АС 250", t: "12:11" }, { p: "В 765 УН 797", t: "12:11" },
+                    { p: "О 074 ВО 250", t: "12:03" }, { p: "К 450 ХО 750", t: "10:53" }, { p: "В 241 СЕ 777", t: "11:59" },
+                    { p: "А 050 КХ 197", t: "11:54" }, { p: "O 462 MC 977", t: "12:10" }, { p: "В 554 НЕ 799", t: "12:12" },
+                    { p: "С 013 ВВ 977", t: "12:11" }, { p: "В 632 ВХ 250", t: "12:11" }, { p: "С 018 АТ 550", t: "11:51" },
+                    { p: "С 129 ВТ 797", t: "10:54" }, { p: "О 808 РТ 777", t: "12:00" }, { p: "М 736 КО 977", t: "11:59" },
+                    { p: "А 138 ВМ 550", t: "11:51" }, { p: "С 596 МВ 197", t: "12:13" }, { p: "М 319 ОА 799", t: "11:59" },
+                    { p: "Т 758 АТ 550", t: "11:58" }, { p: "Р 095 ОЕ 199", t: "11:58" }, { p: "В 368 АМ 997", t: "12:10" },
+                    { p: "У 468 НТ 799", t: "11:49" }, { p: "С 640 УК 69", t: "10:52" }, { p: "У 315 ОХ 197", t: "10:52" }
+                ];
+                let updatedCount = 0;
+                restoreArrived.forEach(car => {
+                    let v = vehicles.find(x => normalizeSearch(x.plate) === normalizeSearch(car.p) || normalizeSearch(x.brand) === normalizeSearch(car.p));
+                    if (v && v.status !== 'arrived') {
+                        v.status = 'arrived';
+                        v.arrivedAt = car.t;
+                        updatedCount++;
+                    }
+                });
+                if (updatedCount > 0) { 
+                    saveToStorage(); 
+                    showToast(`Автоматически восстановлены статусы для ${updatedCount} машин`);
+                }
+                localStorage.setItem(recoveryKey, 'done');
+            }
+            // ------------------------------------------------------------
+
             populateCategoryFilter();
             populateSectorSelectors();
             renderStaffSection();
@@ -1144,14 +1350,22 @@
         function initDataForDate(dateStr) {
             const storageKey = `heroes_parking_archive_v3_${dateStr}`;
             const saved = localStorage.getItem(storageKey);
+            
+            rawVehicleData = loadBaseTemplate(); 
+            
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
-                    vehicles = parsed.map((item, index) => {
-                        let st = item.status || 'pending';
+                    
+                    vehicles = rawVehicleData.map((item, index) => {
+                        const cleanPlate = item.plate.replace(/\s/g,'').toLowerCase();
+                        const existing = parsed.find(p => p.plate.replace(/\s/g,'').toLowerCase() === cleanPlate && cleanPlate !== '—');
+                        
+                        let st = existing ? (existing.status || 'pending') : 'pending';
                         if (st === 'transit') st = 'pending';
+                        
                         return {
-                            id: item.id !== undefined ? item.id : index,
+                            id: index,
                             category: item.category || 'Без категории',
                             brand: item.brand || '—',
                             plate: item.plate || '—',
@@ -1159,10 +1373,21 @@
                             sector: normalizeSectorName(item.sector),
                             note: item.note || '',
                             status: st,
-                            arrivedAt: item.arrivedAt || item.timestamp || null,
-                            departedAt: item.departedAt || null
+                            arrivedAt: existing ? (existing.arrivedAt || existing.timestamp || null) : null,
+                            departedAt: existing ? (existing.departedAt || null) : null
                         };
                     });
+                    
+                    parsed.forEach(p => {
+                        const cleanOldPlate = p.plate.replace(/\s/g,'').toLowerCase();
+                        const existsInNew = vehicles.find(v => v.plate.replace(/\s/g,'').toLowerCase() === cleanOldPlate);
+                        if (!existsInNew) {
+                            vehicles.push(p);
+                        }
+                    });
+                    
+                    vehicles.forEach((v, i) => v.id = i);
+                    
                 } catch (e) {
                     loadDefaultVehiclesForDate();
                 }
@@ -1445,15 +1670,10 @@
             });
         }
 
-        // =========================================================================
-        // ЛОГИКА ПОЛНОЭКРАННОГО ОКНА СОВПАДЕНИЯ (КПП-РАДАР)
-        // =========================================================================
         function getMatchingVehiclesForOverlay(q) {
             if (!q) return [];
             const qNorm = normalizeSearch(q);
-            const qDigitsOnly = q.replace(/\D/g, '');
 
-            // Приоритет 1: Если введены ровно 3 цифры (например "331"), ищем сначала машины с этими цифрами госномера
             if (/^\d{3}$/.test(q.trim())) {
                 const exactThreeDigitMatches = vehicles.filter(v => {
                     const mainDigits = extractPlateMainDigits(v.plate);
@@ -1462,7 +1682,6 @@
                 if (exactThreeDigitMatches.length > 0) return exactThreeDigitMatches;
             }
 
-            // Приоритет 2: Общий умный поиск по номеру, марке, гостю
             return vehicles.filter(v => matchesVehicleQuery(v, q));
         }
 
@@ -1476,9 +1695,6 @@
 
             if (isOverlayManuallyDismissed) return;
 
-            // Автоматически открываем полноэкранное окно, если:
-            // 1) Введены минимум 3 цифры (например "331") И есть совпадения в базе
-            // 2) Либо введено от 3 символов (например "845", "аурус", "шаман") и найдено от 1 до 6 машин
             const isThreeDigits = /^\d{3,}$/.test(qNorm);
             const isSpecificEnough = qNorm.length >= 3 && matches.length >= 1 && matches.length <= 6;
 
@@ -1517,7 +1733,6 @@
 
         function handleOverlayAction(id, targetStatus) {
             setStatus(id, targetStatus);
-            // После нажатия "Заехал" / "Выехал" закрываем полноэкранное окно и очищаем поиск для следующей машины
             closeFullscreenMatchOverlay(true);
         }
 
@@ -1543,7 +1758,6 @@
                 return;
             }
 
-            // Если найдена ровно 1 машина — выводим ОГРОМНУЮ карточку на весь экран
             if (matches.length === 1) {
                 const v = matches[0];
                 const cleanPhone = v.phone.replace(/[^\d+]/g, '');
@@ -1583,7 +1797,6 @@
                 container.innerHTML = `
                     <div class="animate-pop bg-slate-900 border-2 ${isVip ? 'border-amber-500/70' : 'border-indigo-500/60'} rounded-3xl p-5 sm:p-8 shadow-2xl space-y-6">
                         
-                        <!-- Top Badges: Category + Giant Zone Pill -->
                         <div class="flex flex-wrap items-center justify-between gap-3">
                             <div class="flex items-center gap-2.5">
                                 <span class="px-4 py-1.5 rounded-xl text-sm sm:text-base font-extrabold uppercase tracking-wider ${isVip ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40'}">
@@ -1597,7 +1810,6 @@
                             </div>
                         </div>
 
-                        <!-- Giant License Plate -->
                         <div class="bg-slate-950 border-2 border-slate-700 rounded-3xl py-6 px-4 text-center shadow-inner">
                             <div class="text-3xl sm:text-5xl font-extrabold font-mono tracking-widest text-white select-all">
                                 ${escapeHtml(v.plate)}
@@ -1608,7 +1820,6 @@
                             </div>
                         </div>
 
-                        <!-- Driver Phone & Timestamps -->
                         <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-800/70 border border-slate-700/80 px-4 py-3 rounded-2xl text-sm">
                             <div class="flex items-center gap-3">
                                 <span class="text-slate-400">Водитель:</span>
@@ -1622,7 +1833,6 @@
                             </div>
                         </div>
 
-                        <!-- Primary Giant Action Button -->
                         <div>
                             ${actionButtonsHtml}
                         </div>
@@ -1631,7 +1841,6 @@
                 return;
             }
 
-            // Если найдено НЕСКОЛЬКО машин с одинаковыми цифрами — выводим список крупных карточек для выбора нужной
             let listHtml = `
                 <div class="space-y-3">
                     <div class="text-xs sm:text-sm font-semibold text-amber-300 bg-amber-500/10 border border-amber-500/30 px-4 py-2.5 rounded-xl flex items-center gap-2">
@@ -2338,7 +2547,6 @@
             return str.toString().replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
         }
 
-        // Регистрация Service Worker для 100% работы без интернета (Offline PWA)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
